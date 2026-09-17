@@ -41,10 +41,14 @@ from .profit_engine import (
 )
 
 def home(request):
-    return HttpResponse("G Fleet IQ is running")
+    all_loads = list(Load.objects.all().select_related("driver"))
+    total_revenue = 0
+    total_profit = 0
 
-    all_loads = list(Load.objects.all())
-
+    for load in all_loads:
+        result = calculate_load_profit(load)
+        total_revenue += result["revenue"]
+        total_profit += result["profit"]
     # ======================================================
     # DASHBOARD CONTEXT
     # ======================================================
