@@ -1,4 +1,5 @@
 from urllib import request
+from django.http import HttpResponse
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
@@ -40,21 +41,9 @@ from .profit_engine import (
 )
 
 def home(request):
+    return HttpResponse("G Fleet IQ is running")
+
     all_loads = list(Load.objects.all())
-
-    total_revenue = 0
-    total_profit = 0
-
-    for load in all_loads:
-        result = calculate_load_profit(load)
-        total_revenue += result["revenue"]
-        total_profit += result["profit"]
-
-    average_profit = (
-        total_profit / len(all_loads)
-        if all_loads
-        else 0
-    )
 
     # ======================================================
     # DASHBOARD CONTEXT
