@@ -479,6 +479,9 @@ def ai_dispatch(request):
             ai_reasons.append("✔ High Priority Load")
 
     ai_score = min(ai_score, 100)
+    driver_to_pickup_miles = None
+    driver_pickup_eta = None
+    best_fuel_stop = None
 
     context = {
         "drivers": available_drivers,
