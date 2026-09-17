@@ -44,11 +44,14 @@ def home(request):
     all_loads = list(Load.objects.all().select_related("driver"))
     total_revenue = 0
     total_profit = 0
+    average_profit = (
+    total_profit / len(all_loads)
+    if all_loads
+    else 0
+)
 
-    for load in all_loads:
-        result = calculate_load_profit(load)
-        total_revenue += result["revenue"]
-        total_profit += result["profit"]
+
+    
     # ======================================================
     # DASHBOARD CONTEXT
     # ======================================================
