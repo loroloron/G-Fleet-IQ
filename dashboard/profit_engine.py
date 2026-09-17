@@ -1,24 +1,38 @@
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 
-# ==========================================================
-# PROFIT ENGINE
-# ==========================================================
+def to_decimal(value, default="0"):
+    """
+    Safely convert numbers, empty values, or None into Decimal.
+    """
+    if value in (None, ""):
+        return Decimal(default)
+
+    try:
+        return Decimal(str(value))
+    except (InvalidOperation, TypeError, ValueError):
+        return Decimal(default)
+
 
 def calculate_load_profit(load):
 
-    revenue = Decimal(load.rate or 0)
-
-    miles = Decimal(
-        load.miles or load.distance or 0
+    revenue = to_decimal(
+        getattr(load, "rate", 0)
     )
+
+    miles = to_decimal(
+        getattr(load, "miles", 0)
+    )
+
+    if miles <= 0:
+        miles = to_decimal(
+            getattr(load, "distance", 0)
+        )
 
     # ======================================================
     # FUEL
     # ======================================================
 
-    # Use the assigned driver's fuel efficiency.
-    # Fall back to 7.0 MPG when no driver is assigned.
     driver = getattr(load, "driver", None)
 
     driver_mpg = getattr(
@@ -27,16 +41,14 @@ def calculate_load_profit(load):
         None,
     )
 
-    if driver_mpg:
-        mpg = Decimal(str(driver_mpg))
-    else:
+    mpg = to_decimal(driver_mpg, "7.0")
+
+    if mpg <= 0:
         mpg = Decimal("7.0")
 
-    # Default diesel price
     fuel_price = Decimal("3.75")
 
-    # Calculate fuel automatically
-    if miles > 0 and mpg > 0:
+    if miles > 0:
         gallons = miles / mpg
         fuel_cost = gallons * fuel_price
     else:
@@ -47,20 +59,20 @@ def calculate_load_profit(load):
     # OTHER EXPENSES
     # ======================================================
 
-    driver_pay = Decimal(
-        load.driver_pay or 0
+    driver_pay = to_decimal(
+        getattr(load, "driver_pay", 0)
     )
 
-    tolls = Decimal(
-        load.tolls or 0
+    tolls = to_decimal(
+        getattr(load, "tolls", 0)
     )
 
-    maintenance_cost = Decimal(
-        load.maintenance_cost or 0
+    maintenance_cost = to_decimal(
+        getattr(load, "maintenance_cost", 0)
     )
 
-    insurance_cost = Decimal(
-        load.insurance_cost or 0
+    insurance_cost = to_decimal(
+        getattr(load, "insurance_cost", 0)
     )
 
     total_expenses = (
@@ -97,12 +109,6 @@ def calculate_load_profit(load):
         "profit": profit,
         "profit_per_mile": profit_per_mile,
     }
-
-
-# ==========================================================
-# SAVE PROFIT
-# ==========================================================
-
 def save_load_profit(load):
 
     result = calculate_load_profit(load)
