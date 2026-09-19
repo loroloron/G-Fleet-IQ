@@ -41,14 +41,13 @@ from .profit_engine import (
 )
 
 def home(request):
-    all_loads = list(Load.objects.all().select_related("driver"))
+    all_loads = list(
+        Load.objects.all().select_related("driver")
+    )
+
     total_revenue = 0
     total_profit = 0
-    average_profit = (
-    total_profit / len(all_loads)
-    if all_loads
-    else 0
-)
+    average_profit = 0
 
 
     
