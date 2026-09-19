@@ -30,6 +30,10 @@ from .ai_engine import (
     select_best_truck,
     select_best_trailer,
 )
+from .profit_engine import (
+    calculate_load_profit,
+    save_load_profit,
+)
 
 from .geocode_engine import geocode_address
 from .planning_engine import plan_all_loads as build_plans
@@ -374,6 +378,51 @@ def loads(request):
         {
             "loads": Load.objects.all(),
             "form": form,
+        },
+    )
+def load_detail(request, load_id):
+    load = get_object_or_404(Load, id=load_id)
+
+    return render(
+        request,
+        "dashboard/load_detail.html",
+        {"load": load},
+    )
+def edit_load(request, load_id):
+    load = get_object_or_404(Load, id=load_id)
+
+    if request.method == "POST":
+        form = LoadForm(request.POST, instance=load)
+
+        if form.is_valid():
+            load = form.save(commit=False)
+
+            pickup_result = geocode_address(load.pickup)
+            delivery_result = geocode_address(load.delivery)
+
+            if pickup_result:
+                load.pickup_latitude = pickup_result["latitude"]
+                load.pickup_longitude = pickup_result["longitude"]
+
+            if delivery_result:
+                load.delivery_latitude = delivery_result["latitude"]
+                load.delivery_longitude = delivery_result["longitude"]
+
+            load.save()
+
+            save_load_profit(load)
+
+            return redirect("load_detail", load_id=load.id)
+
+    else:
+        form = LoadForm(instance=load)
+
+    return render(
+        request,
+        "dashboard/edit_load.html",
+        {
+            "form": form,
+            "load": load,
         },
     )
 

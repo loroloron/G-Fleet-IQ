@@ -48,6 +48,8 @@ path(
     name="delete_customer",
 ),
 path("loads/", views.loads, name="loads"),
+path("loads/<int:load_id>/", views.load_detail, name="load_detail"),
+path("loads/<int:load_id>/edit/", views.edit_load, name="edit_load"),
 path("loads/<int:load_id>/delete/", views.delete_load, name="delete_load"),
 path("companies/", views.companies, name="companies"),
 path("fleet-map/", views.fleet_map, name="fleet_map"),

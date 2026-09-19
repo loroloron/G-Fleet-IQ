@@ -1,0 +1,37 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h1>✏️ Edit Load</h1>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <h3>Load #{{ load.id }}</h3>
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST">
+                {% csrf_token %}
+
+                {{ form.as_p }}
+
+                <button type="submit" class="btn btn-success">
+                    💾 Save Changes
+                </button>
+
+                <a href="{% url 'load_detail' load.id %}"
+                   class="btn btn-secondary">
+                    Cancel
+                </a>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

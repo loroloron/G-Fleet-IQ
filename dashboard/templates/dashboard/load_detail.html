@@ -1,0 +1,55 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h1>📦 Load Details</h1>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <h3>{{ load.customer }}</h3>
+        </div>
+
+        <div class="card-body">
+
+            <p><strong>Pickup:</strong> {{ load.pickup }}</p>
+            <p><strong>Delivery:</strong> {{ load.delivery }}</p>
+
+            <hr>
+
+            <p><strong>Status:</strong> {{ load.status }}</p>
+            <p><strong>Driver:</strong> {{ load.driver }}</p>
+            <p><strong>Truck:</strong> {{ load.truck }}</p>
+            <p><strong>Trailer:</strong> {{ load.trailer }}</p>
+
+            <hr>
+
+            <p><strong>Weight:</strong> {{ load.weight }}</p>
+            <p><strong>Miles:</strong> {{ load.miles }}</p>
+            <p><strong>Rate:</strong> ${{ load.rate }}</p>
+            <p><strong>Equipment:</strong> {{ load.equipment_type }}</p>
+            <p><strong>Priority:</strong> {{ load.priority }}</p>
+
+            <hr>
+
+            <h4>💰 Expenses & Profit</h4>
+
+            <p><strong>Fuel Cost:</strong> ${{ load.fuel_cost }}</p>
+            <p><strong>Driver Pay:</strong> ${{ load.driver_pay }}</p>
+            <p><strong>Tolls:</strong> ${{ load.tolls }}</p>
+            <p><strong>Maintenance:</strong> ${{ load.maintenance_cost }}</p>
+            <p><strong>Insurance:</strong> ${{ load.insurance_cost }}</p>
+            <p><strong>Profit:</strong> ${{ load.profit }}</p>
+            <p><strong>Profit per Mile:</strong> ${{ load.profit_per_mile }}</p>
+
+        </div>
+    </div>
+
+    <a href="{% url 'loads' %}" class="btn btn-primary mt-3">
+        ← Back to Loads
+    </a>
+
+</div>
+
+{% endblock %}
