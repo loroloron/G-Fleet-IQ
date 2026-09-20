@@ -47,53 +47,28 @@ def landing(request):
     return render(request, "dashboard/landing.html")
 
 def home(request):
-    all_loads = list(
-        Load.objects.all().select_related("driver")
-    )
+    all_loads = list(Load.objects.all())
 
     total_revenue = 0
     total_profit = 0
-    average_profit = 0
 
+    for load in all_loads:
+        result = calculate_load_profit(load)
+        total_revenue += result["revenue"]
+        total_profit += result["profit"]
 
-    
-    # ======================================================
-    # DASHBOARD CONTEXT
-    # ======================================================
+    average_profit = (
+        total_profit / len(all_loads)
+        if all_loads
+        else 0
+    )
+
     context = {
         "drivers": Driver.objects.count(),
         "trucks": Truck.objects.count(),
         "trailers": Trailer.objects.count(),
         "loads": Load.objects.count(),
         "customers": Customer.objects.count(),
-
-        "available_drivers": Driver.objects.filter(
-            available=True
-        ).count(),
-
-        "available_trucks": Truck.objects.filter(
-            active=True
-        ).count(),
-
-        "available_trailers": Trailer.objects.filter(
-            available=True
-        ).count(),
-
-        "available_loads": Load.objects.filter(
-            status="Available"
-        ).count(),
-
-        "active_loads": Load.objects.filter(
-            status="Assigned"
-        ).count(),
-
-        "recent_drivers": Driver.objects.order_by(
-            "-id"
-        )[:5],
-
-        "recent_trucks": Truck.objects.order_by(
-            "-id"
-        )[:5],
 
         "total_revenue": total_revenue,
         "total_profit": total_profit,
