@@ -43,6 +43,8 @@ from .profit_engine import (
     calculate_load_profit,
      
 )
+def landing(request):
+    return render(request, "dashboard/landing.html")
 
 def home(request):
     all_loads = list(

@@ -1,0 +1,85 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="text-center py-5">
+        <h1 class="display-3 fw-bold">🚛 G Fleet IQ</h1>
+
+        <h2 class="mt-3">
+            AI-Powered Fleet Dispatch & Profit Management
+        </h2>
+
+        <p class="lead mt-4">
+            Manage loads, drivers, trucks, trailers, fuel and profitability
+            from one intelligent fleet platform.
+        </p>
+
+        <div class="mt-4">
+            <a href="{% url 'home' %}" class="btn btn-primary btn-lg me-2">
+                🚀 Enter G Fleet IQ
+            </a>
+
+            <a href="#demo" class="btn btn-outline-secondary btn-lg">
+                ▶ See How It Works
+            </a>
+        </div>
+    </div>
+
+    <div id="demo" class="row g-4 mt-4">
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h3>🤖 AI Dispatch</h3>
+                    <p>
+                        Match loads with available drivers, trucks and
+                        trailers using dispatch intelligence.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h3>💰 Profit Intelligence</h3>
+                    <p>
+                        Calculate fuel costs, expenses, profit and
+                        profit-per-mile for every load.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h3>📊 Fleet Visibility</h3>
+                    <p>
+                        See drivers, trucks, trailers, loads and active
+                        dispatches from one dashboard.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="text-center mt-5 py-5">
+        <h2>How G Fleet IQ Works</h2>
+
+        <p class="lead mt-3">
+            Customer → Load → AI Dispatch → Driver + Truck + Trailer
+            → Assigned Load → Profit Analysis
+        </p>
+
+        <a href="{% url 'home' %}" class="btn btn-success btn-lg mt-3">
+            🚛 Launch Live Demo
+        </a>
+    </div>
+
+</div>
+
+{% endblock %}

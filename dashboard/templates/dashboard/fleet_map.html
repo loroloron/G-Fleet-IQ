@@ -25,10 +25,12 @@ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 const map = L.map('map').setView([39.7684, -86.1581], 7);
 
 L.tileLayer(
-    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    'https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_3r0h_2_04067f83aa8b91505b5a352f',
+    
+
     {
-        attribution: '&copy; OpenStreetMap',
-        maxZoom: 19
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+        maxZoom: 20
     }
 ).addTo(map);
 

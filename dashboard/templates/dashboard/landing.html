@@ -1,0 +1,287 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+
+<style>
+    .hero {
+        padding: 80px 20px;
+        text-align: center;
+        background: linear-gradient(135deg, #0d6efd, #0b1f3a);
+        color: white;
+        border-radius: 20px;
+        margin-bottom: 50px;
+    }
+
+    .hero h1 {
+        font-size: 4rem;
+        font-weight: 800;
+    }
+
+    .hero h2 {
+        font-weight: 400;
+        margin-top: 15px;
+    }
+
+    .hero p {
+        font-size: 1.2rem;
+        max-width: 800px;
+        margin: 25px auto;
+    }
+
+    .feature-card {
+        border: none;
+        border-radius: 16px;
+        transition: transform 0.2s;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .feature-icon {
+        font-size: 3rem;
+    }
+
+    .workflow {
+        background: #f8f9fa;
+        border-radius: 20px;
+        padding: 50px 25px;
+        margin-top: 50px;
+    }
+</style>
+
+<div class="container py-4">
+
+    <!-- HERO -->
+    <div class="hero shadow">
+
+        <h1>🚛 G Fleet IQ</h1>
+
+        <h2>AI-Powered Fleet Dispatch & Profit Management</h2>
+
+        <p>
+            One intelligent platform to manage loads, drivers, trucks,
+            trailers, dispatching and fleet profitability.
+        </p>
+
+        <div class="mt-4">
+
+            <a href="{% url 'home' %}"
+               class="btn btn-light btn-lg me-2">
+                🚀 Enter G Fleet IQ
+            </a>
+
+            <a href="#features"
+               class="btn btn-outline-light btn-lg">
+                See How It Works
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- FEATURES -->
+
+    <div id="features" class="text-center mb-5">
+
+        <h2>Everything Your Fleet Needs</h2>
+
+        <p class="text-muted">
+            G Fleet IQ brings your fleet operations together in one platform.
+        </p>
+
+    </div>
+
+
+    <div class="row g-4">
+
+        <div class="col-md-4">
+
+            <div class="card feature-card shadow-sm h-100">
+
+                <div class="card-body text-center p-4">
+
+                    <div class="feature-icon">🤖</div>
+
+                    <h3 class="mt-3">AI Dispatch</h3>
+
+                    <p>
+                        Match loads with available drivers, trucks and
+                        trailers to help streamline dispatch operations.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4">
+
+            <div class="card feature-card shadow-sm h-100">
+
+                <div class="card-body text-center p-4">
+
+                    <div class="feature-icon">💰</div>
+
+                    <h3 class="mt-3">Profit Intelligence</h3>
+
+                    <p>
+                        Track revenue, fuel costs, expenses, profit and
+                        profit per mile for every load.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4">
+
+            <div class="card feature-card shadow-sm h-100">
+
+                <div class="card-body text-center p-4">
+
+                    <div class="feature-icon">🗺️</div>
+
+                    <h3 class="mt-3">Fleet Map</h3>
+
+                    <p>
+                        Monitor trucks and fleet activity using an
+                        interactive fleet map.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4">
+
+            <div class="card feature-card shadow-sm h-100">
+
+                <div class="card-body text-center p-4">
+
+                    <div class="feature-icon">📦</div>
+
+                    <h3 class="mt-3">Load Management</h3>
+
+                    <p>
+                        Create, edit, dispatch and track loads from
+                        one centralized system.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4">
+
+            <div class="card feature-card shadow-sm h-100">
+
+                <div class="card-body text-center p-4">
+
+                    <div class="feature-icon">🚛</div>
+
+                    <h3 class="mt-3">Fleet Management</h3>
+
+                    <p>
+                        Manage drivers, trucks and trailers while keeping
+                        your fleet organized.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4">
+
+            <div class="card feature-card shadow-sm h-100">
+
+                <div class="card-body text-center p-4">
+
+                    <div class="feature-icon">📊</div>
+
+                    <h3 class="mt-3">Fleet Dashboard</h3>
+
+                    <p>
+                        Get a centralized view of your fleet operations
+                        and important business information.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- WORKFLOW -->
+
+    <div class="workflow text-center">
+
+        <h2>How G Fleet IQ Works</h2>
+
+        <p class="lead mt-4">
+
+            Customer
+
+            <strong>→</strong>
+
+            Load
+
+            <strong>→</strong>
+
+            AI Dispatch
+
+            <strong>→</strong>
+
+            Driver + Truck + Trailer
+
+            <strong>→</strong>
+
+            Delivery
+
+            <strong>→</strong>
+
+            Profit Analysis
+
+        </p>
+
+    </div>
+
+
+    <!-- CALL TO ACTION -->
+
+    <div class="text-center py-5">
+
+        <h2>Ready to See G Fleet IQ in Action?</h2>
+
+        <p class="lead text-muted">
+            Explore the live fleet management platform.
+        </p>
+
+        <a href="{% url 'home' %}"
+           class="btn btn-primary btn-lg">
+            🚛 Launch G Fleet IQ
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}
