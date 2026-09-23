@@ -117,23 +117,87 @@
 
     <div class="video-section">
 
-        <h2>🎬 See G Fleet IQ in Action</h2>
+    <h2>🎬 See G Fleet IQ in Action</h2>
 
-        <p>
-            See how G Fleet IQ brings fleet management,
-            dispatch and operational visibility together.
-        </p>
+    <p>
+        Explore how G Fleet IQ manages dispatching,
+        loads, fleet operations and profitability.
+    </p>
 
-        <video controls preload="metadata">
+    <div style="max-width:1100px; margin:30px auto; text-align:center;">
 
-           <source
-    src="{% static 'VIDEOS/G_Fleet_IQ_Demo.mp4' %}"
-    type="video/mp4">
-            Your browser does not support video playback.
+        <img
+            id="fleetSlide"
+            src="{% static 'SLIDESHOW/images/000_opening.png' %}"
+            style="width:100%; max-height:600px; object-fit:contain; border-radius:12px; box-shadow:0 5px 25px rgba(0,0,0,0.2);"
+        >
 
-        </video>
+        <div style="margin-top:20px;">
+
+            <button onclick="previousSlide()">
+                ◀ Previous
+            </button>
+
+            <button onclick="nextSlide()">
+                Next ▶
+            </button>
+
+            <button onclick="toggleSlide()">
+                ⏸ Pause
+            </button>
+
+        </div>
 
     </div>
+
+</div>
+
+<script>
+
+const slides = [
+    "{% static 'SLIDESHOW/images/000_opening.png' %}",
+    "{% static 'SLIDESHOW/images/001.png' %}",
+    "{% static 'SLIDESHOW/images/002.png' %}",
+    "{% static 'SLIDESHOW/images/003.png' %}",
+    "{% static 'SLIDESHOW/images/004.png' %}",
+    "{% static 'SLIDESHOW/images/005.png' %}",
+    "{% static 'SLIDESHOW/images/006.png' %}",
+    "{% static 'SLIDESHOW/images/007.png' %}",
+    "{% static 'SLIDESHOW/images/008.png' %}",
+    "{% static 'SLIDESHOW/images/009.png' %}",
+    "{% static 'SLIDESHOW/images/010.png' %}",
+    "{% static 'SLIDESHOW/images/999_closing.png' %}"
+];
+
+let currentSlide = 0;
+let playing = true;
+
+function showSlide() {
+    document.getElementById("fleetSlide").src = slides[currentSlide];
+}
+
+function nextSlide() {
+    currentSlide = (currentSlide + 1) % slides.length;
+    showSlide();
+}
+
+function previousSlide() {
+    currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+    showSlide();
+}
+
+function toggleSlide() {
+    playing = !playing;
+    event.target.innerText = playing ? "⏸ Pause" : "▶ Play";
+}
+
+setInterval(function() {
+    if (playing) {
+        nextSlide();
+    }
+}, 5000);
+
+</script>
 
 
     <div class="features">
