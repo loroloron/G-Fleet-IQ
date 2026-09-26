@@ -1,14 +1,15 @@
 {% extends "dashboard/base.html" %}
+{% load i18n %}
 
 {% block content %}
 
-<h1 class="mb-4">🗑️ Delete Driver</h1>
+<h1 class="mb-4">🗑️ {% translate "Delete Driver" %}</h1>
 
 <div class="card shadow">
     <div class="card-body">
 
         <p>
-            Are you sure you want to delete
+            {% translate "Are you sure you want to delete" %}
             <strong>{{ driver.name }}</strong>?
         </p>
 
@@ -16,11 +17,11 @@
             {% csrf_token %}
 
             <button type="submit" class="btn btn-danger">
-                🗑️ Yes, Delete
+                🗑️ {% translate "Yes, Delete" %}
             </button>
 
             <a href="{% url 'drivers' %}" class="btn btn-secondary">
-                Cancel
+                {% translate "Cancel" %}
             </a>
 
         </form>

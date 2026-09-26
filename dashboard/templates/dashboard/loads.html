@@ -1,12 +1,13 @@
 {% extends "dashboard/base.html" %}
+{% load i18n %}
 
 {% block content %}
 
-<h1 class="mb-4">📦 Loads</h1>
+<h1 class="mb-4">📦 {% translate "Loads" %}</h1>
 <div class="card mb-4">
     <div class="card-body">
 
-        <h3>Add New Load</h3>
+        <h3>{% translate "Add New Load" %}</h3>
 
         <form method="POST">
             {% csrf_token %}
@@ -14,7 +15,7 @@
             {{ form.as_p }}
 
             <button type="submit" class="btn btn-primary">
-                Save Load
+                {% translate "Save Load" %}
             </button>
 
         </form>
@@ -23,18 +24,18 @@
 </div>
 
 <a href="/" class="btn btn-secondary mb-3">
-    ← Back to Dashboard
+    ← {% translate "Back to Dashboard" %}
 </a>
 <table class="table table-striped">
 
     <thead>
         <tr>
-            <th>Customer</th>
-            <th>Driver</th>
-            <th>Truck</th>
-            <th>Trailer</th>
-            <th>Status</th>
-            <th>Actions</th>
+            <th>{% translate "Customer" %}</th>
+            <th>{% translate "Driver" %}</th>
+            <th>{% translate "Truck" %}</th>
+            <th>{% translate "Trailer" %}</th>
+            <th>{% translate "Status" %}</th>
+            <th>{% translate "Actions" %}</th>
         </tr>
     </thead>
 
@@ -50,21 +51,19 @@
         <td>{{ load.status }}</td>
 
         <td>
-
-    <td>
     <a href="{% url 'load_detail' load.id %}"
        class="btn btn-primary btn-sm">
-        👁️ View Details
+        👁️ {% translate "View Details" %}
     </a>
 
     <a href="{% url 'edit_load' load.id %}"
        class="btn btn-warning btn-sm">
-        ✏️ Edit
+        ✏️ {% translate "Edit" %}
     </a>
 
     <a href="{% url 'delete_load' load.id %}"
        class="btn btn-danger btn-sm">
-        🗑️ Delete
+        🗑️ {% translate "Delete" %}
     </a>
 </td>
     </tr>
@@ -73,7 +72,7 @@
 
     <tr>
         <td colspan="6" class="text-center">
-            No loads found.
+            {% translate "No loads found." %}
         </td>
     </tr>
 

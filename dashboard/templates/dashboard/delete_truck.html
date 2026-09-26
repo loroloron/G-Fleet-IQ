@@ -1,15 +1,16 @@
 {% extends "dashboard/base.html" %}
+{% load i18n %}
 
 {% block content %}
 
-<h1>🗑️ Delete Truck</h1>
+<h1>🗑️ {% translate "Delete Truck" %}</h1>
 
-<p>Delete truck <strong>{{ truck }}</strong>?</p>
+<p>{% translate "Delete truck" %} <strong>{{ truck }}</strong>?</p>
 
 <form method="POST">
     {% csrf_token %}
-    <button class="btn btn-danger">Delete</button>
-    <a href="{% url 'trucks' %}" class="btn btn-secondary">Cancel</a>
+    <button class="btn btn-danger">{% translate "Delete" %}</button>
+    <a href="{% url 'trucks' %}" class="btn btn-secondary">{% translate "Cancel" %}</a>
 </form>
 
 {% endblock %}

@@ -1,0 +1,20 @@
+{% extends "dashboard/base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h1 class="h3">{% translate "Set up your G Fleet IQ account" %}</h1>
+                <p>{% translate "Your G Fleet IQ account is your workspace. The companies listed in the app are your clients; you do not need to own those companies." %}</p>
+                <p class="text-muted">{% translate "The first person to finish this setup becomes the account owner. The owner can add team members and assign access." %}</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <button class="btn btn-primary" type="submit">{% translate "Set me as account owner" %}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,12 +1,13 @@
 {% extends "dashboard/base.html" %}
+{% load i18n %}
 
 {% block content %}
 
-<h2 class="mb-4">🏢 Companies</h2>
+<h2 class="mb-4">🏢 {% translate "Client Companies" %}</h2>
 
 <div class="card mb-4">
     <div class="card-header">
-        Add New Company
+        {% translate "Add Client Company" %}
     </div>
 
     <div class="card-body">
@@ -16,7 +17,7 @@
             {{ form.as_p }}
 
             <button type="submit" class="btn btn-primary">
-                Save Company
+                {% translate "Save Client Company" %}
             </button>
         </form>
 
@@ -26,7 +27,7 @@
 <div class="card">
 
     <div class="card-header">
-        Company List
+        {% translate "Client Company List" %}
     </div>
 
     <div class="card-body">
@@ -35,11 +36,12 @@
 
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>DOT</th>
-                    <th>MC</th>
-                    <th>Email</th>
-                    <th>Phone</th>
+                    <th>{% translate "Name" %}</th>
+                    <th>{% translate "DOT" %}</th>
+                    <th>{% translate "MC" %}</th>
+                    <th>{% translate "Email" %}</th>
+                    <th>{% translate "Phone" %}</th>
+                    <th>{% translate "Actions" %}</th>
                 </tr>
             </thead>
 
@@ -53,12 +55,16 @@
                     <td>{{ company.mc_number }}</td>
                     <td>{{ company.email }}</td>
                     <td>{{ company.phone }}</td>
+                    <td>
+                        <a href="{% url 'edit_company' company.id %}" class="btn btn-primary btn-sm">{% translate "Edit" %}</a>
+                        <a href="{% url 'client_team' company.id %}" class="btn btn-outline-primary btn-sm">{% translate "Manage access" %}</a>
+                    </td>
                 </tr>
 
             {% empty %}
 
                 <tr>
-                    <td colspan="5">No companies found.</td>
+                    <td colspan="6">{% translate "No companies found." %}</td>
                 </tr>
 
             {% endfor %}

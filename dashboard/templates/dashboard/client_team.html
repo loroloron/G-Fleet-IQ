@@ -1,0 +1,63 @@
+{% extends "dashboard/base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="mb-4">
+    <h1>{% translate "Client access" %}: {{ company.name }}</h1>
+    {% if request.is_account_admin %}
+    <p class="text-muted">{% translate "Assign a Client Administrator. They can then add or remove dispatchers for this client only." %}</p>
+    {% else %}
+    <p class="text-muted">{% translate "Add or remove dispatchers for this client. They will only see this client’s data." %}</p>
+    {% endif %}
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h2 class="h5">{% translate "Grant access" %}</h2>
+        <p class="text-muted">{% translate "The person must create a G Fleet IQ login before you can grant access." %}</p>
+        <form method="post" class="row g-3 align-items-end">
+            {% csrf_token %}
+            <div class="col-md-5">
+                <label class="form-label" for="username">{% translate "Username" %}</label>
+                <input class="form-control" id="username" name="username" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="role">{% translate "Access level" %}</label>
+                <select class="form-select" id="role" name="role">
+                    {% for value, label in roles %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3"><button class="btn btn-primary w-100" type="submit">{% translate "Save access" %}</button></div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h2 class="h5">{% translate "People with access" %}</h2>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead><tr><th>{% translate "Username" %}</th><th>{% translate "Access level" %}</th><th>{% translate "Action" %}</th></tr></thead>
+                <tbody>
+                {% for membership in memberships %}
+                    <tr>
+                        <td>{{ membership.user.username }}</td>
+                        <td>{{ membership.get_role_display }}</td>
+                        <td>
+                            {% if membership.user_id != user.id %}
+                            <form method="post" class="d-inline">
+                                {% csrf_token %}<input type="hidden" name="action" value="remove"><input type="hidden" name="membership_id" value="{{ membership.id }}">
+                                <button class="btn btn-sm btn-outline-danger" type="submit">{% translate "Remove access" %}</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="3" class="text-muted">{% translate "No one has access to this client yet." %}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

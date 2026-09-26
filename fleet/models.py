@@ -1,6 +1,51 @@
 from django.db import models
+from django.conf import settings
+from django.utils.translation import gettext_lazy as _
+
+class FleetAccount(models.Model):
+    name = models.CharField(max_length=200, default="G Fleet IQ Account")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
+class AccountMembership(models.Model):
+    ROLE_OWNER = "owner"
+    ROLE_ADMIN = "admin"
+    ROLE_CHOICES = [
+        (ROLE_OWNER, _("Account owner")),
+        (ROLE_ADMIN, _("Administrator")),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="fleet_account_memberships",
+    )
+    account = models.ForeignKey(
+        FleetAccount,
+        on_delete=models.CASCADE,
+        related_name="memberships",
+    )
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    active = models.BooleanField(default=True)
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user"],
+                name="unique_user_fleet_account_membership",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.user} — {self.account} ({self.get_role_display()})"
+
 
 class Company(models.Model):
+    account = models.ForeignKey("FleetAccount", on_delete=models.CASCADE, related_name="clients")
     name = models.CharField(max_length=200)
     dot_number = models.CharField(max_length=50, blank=True)
     mc_number = models.CharField(max_length=50, blank=True)
@@ -10,7 +55,45 @@ class Company(models.Model):
     def __str__(self):
         return self.name
 
+
+class CompanyMembership(models.Model):
+    ROLE_CLIENT_ADMIN = "client_admin"
+    ROLE_DISPATCHER = "dispatcher"
+    ROLE_VIEWER = "viewer"
+    ROLE_CHOICES = [
+        (ROLE_CLIENT_ADMIN, _("Client administrator")),
+        (ROLE_DISPATCHER, _("Dispatcher")),
+        (ROLE_VIEWER, _("Read only")),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="client_memberships",
+    )
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        related_name="memberships",
+    )
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=ROLE_VIEWER)
+    active = models.BooleanField(default=True)
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "company"],
+                name="unique_user_client_membership",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.user} — {self.company} ({self.get_role_display()})"
+
+
 class Truck(models.Model):
+    account = models.ForeignKey(FleetAccount, on_delete=models.CASCADE, related_name="trucks")
     unit_number = models.CharField(max_length=50)
     capacity = models.IntegerField(default=40000)
     active = models.BooleanField(default=True)
@@ -21,6 +104,7 @@ class Truck(models.Model):
         return self.unit_number
 
 class Trailer(models.Model):
+    account = models.ForeignKey(FleetAccount, on_delete=models.CASCADE, related_name="trailers")
     STATUS_CHOICES=[("Empty","Empty"),("Loaded","Loaded"),("Maintenance","Maintenance"),("Out of Service","Out of Service")]
     trailer_number=models.CharField(max_length=50,unique=True)
     status=models.CharField(max_length=20,choices=STATUS_CHOICES,default="Empty")
@@ -34,6 +118,7 @@ class Trailer(models.Model):
         return self.trailer_number
 
 class Driver(models.Model):
+    account = models.ForeignKey(FleetAccount, on_delete=models.CASCADE, related_name="drivers")
     STATUS_CHOICES=[("Available","Available"),("Driving","Driving"),("Off Duty","Off Duty"),("On Break","On Break")]
     name=models.CharField(max_length=100)
     location=models.CharField(max_length=200,blank=True,default="")
@@ -62,6 +147,7 @@ class Driver(models.Model):
         return self.name
 
 class Customer(models.Model):
+    account = models.ForeignKey(FleetAccount, on_delete=models.CASCADE, related_name="customers")
     name=models.CharField(max_length=100)
     location=models.CharField(max_length=200)
     company=models.ForeignKey(Company,on_delete=models.CASCADE,related_name="customers",null=True,blank=True)
@@ -69,6 +155,7 @@ class Customer(models.Model):
         return self.name
 
 class Load(models.Model):
+    account = models.ForeignKey(FleetAccount, on_delete=models.CASCADE, related_name="loads")
     PRIORITY_CHOICES=[("Low","Low"),("Normal","Normal"),("High","High"),("Critical","Critical")]
     customer=models.ForeignKey(Customer,on_delete=models.CASCADE,related_name="loads")
     pickup=models.CharField(max_length=200)

@@ -1,12 +1,16 @@
-from urllib import request
-from django.http import HttpResponse
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import get_user_model
+from django.db import transaction
 from django.db.models import Avg, Sum
 
 from fleet.models import (
     Company,
+    FleetAccount,
+    AccountMembership,
+    CompanyMembership,
     Customer,
     Driver,
     Truck,
@@ -46,8 +50,187 @@ from .profit_engine import (
 def landing(request):
     return render(request, "dashboard/landing.html")
 
+
+def _scope_queryset(request, model, writable=None):
+    queryset = model.objects.filter(account=request.account)
+    if request.is_account_admin:
+        return queryset
+    if writable is None:
+        writable = request.method == "POST"
+    company_ids = request.write_company_ids if writable else request.allowed_company_ids
+    if model is Company:
+        return queryset.filter(id__in=company_ids)
+    if model is Load:
+        return queryset.filter(company_id__in=company_ids)
+    return queryset.filter(company_id__in=company_ids)
+
+
+def _form_company_ids(request):
+    if request.is_account_admin:
+        return None
+    return request.write_company_ids if request.method == "POST" else request.allowed_company_ids
+
+
+def sign_up(request):
+    if request.user.is_authenticated:
+        return redirect("home")
+    form = UserCreationForm(request.POST or None)
+    for field in form.fields.values():
+        field.widget.attrs["class"] = "form-control"
+    if request.method == "POST" and form.is_valid():
+        user = form.save()
+        login(request, user)
+        messages.success(request, "Your account is ready. Welcome to G Fleet IQ!")
+        return redirect("home")
+    return render(request, "registration/signup.html", {"form": form})
+
+
+def account_setup(request):
+    account = FleetAccount.objects.order_by("id").first()
+    if account is None:
+        account = FleetAccount.objects.create(name="G Fleet IQ Account")
+    if AccountMembership.objects.filter(user=request.user, active=True).exists():
+        return redirect("home")
+
+    if request.method == "POST":
+        with transaction.atomic():
+            account = FleetAccount.objects.select_for_update().get(pk=account.pk)
+            owner_exists = AccountMembership.objects.filter(
+                account=account,
+                active=True,
+                role=AccountMembership.ROLE_OWNER,
+            ).exists()
+            if owner_exists:
+                messages.info(request, "Ask your G Fleet IQ account owner to add your username to the team.")
+            else:
+                AccountMembership.objects.create(
+                    user=request.user,
+                    account=account,
+                    role=AccountMembership.ROLE_OWNER,
+                )
+                messages.success(request, "Your G Fleet IQ account is set up. You are the account owner.")
+                return redirect("home")
+
+    return render(request, "registration/account_setup.html", {"account": account})
+
+
+def account_team(request):
+    User = get_user_model()
+    if request.method == "POST":
+        action = request.POST.get("action")
+        membership_id = request.POST.get("membership_id")
+        if action == "remove" and membership_id:
+            membership = get_object_or_404(
+                AccountMembership,
+                pk=membership_id,
+                account=request.account,
+            )
+            if membership.role == AccountMembership.ROLE_OWNER and AccountMembership.objects.filter(
+                account=request.account,
+                active=True,
+                role=AccountMembership.ROLE_OWNER,
+            ).count() <= 1:
+                messages.error(request, "The account needs at least one owner.")
+            elif membership.user_id == request.user.id:
+                messages.error(request, "You cannot remove your own account access here.")
+            else:
+                membership.delete()
+                messages.success(request, "Team access removed.")
+            return redirect("account_team")
+
+        username = request.POST.get("username", "").strip()
+        role = request.POST.get("role", AccountMembership.ROLE_ADMIN)
+        if role not in dict(AccountMembership.ROLE_CHOICES):
+            role = AccountMembership.ROLE_ADMIN
+        teammate = User.objects.filter(username__iexact=username).first()
+        if not teammate:
+            messages.error(request, "That username is not registered yet. Ask them to create an account first.")
+        elif AccountMembership.objects.filter(
+            account=request.account,
+            active=True,
+            role=AccountMembership.ROLE_OWNER,
+        ).exists() is False:
+            messages.error(request, "Set up an account owner before adding administrators.")
+        else:
+            current = AccountMembership.objects.filter(user=teammate, account=request.account).first()
+            if current and current.role == AccountMembership.ROLE_OWNER and role != AccountMembership.ROLE_OWNER:
+                owner_count = AccountMembership.objects.filter(
+                    account=request.account,
+                    active=True,
+                    role=AccountMembership.ROLE_OWNER,
+                ).count()
+                if owner_count <= 1:
+                    messages.error(request, "The account needs at least one owner.")
+                    return redirect("account_team")
+            AccountMembership.objects.update_or_create(
+                user=teammate,
+                account=request.account,
+                defaults={"role": role, "active": True},
+            )
+            messages.success(request, f"{teammate.username} now has {dict(AccountMembership.ROLE_CHOICES)[role]} access.")
+        return redirect("account_team")
+
+    return render(request, "dashboard/account_team.html", {
+        "memberships": AccountMembership.objects.filter(account=request.account, active=True).select_related("user").order_by("joined_at"),
+        "roles": AccountMembership.ROLE_CHOICES,
+    })
+
+
+def client_team(request, company_id):
+    User = get_user_model()
+    company = get_object_or_404(Company, pk=company_id, account=request.account)
+    is_account_admin = request.is_account_admin
+    existing = CompanyMembership.objects.filter(company=company, active=True).select_related("user")
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+        membership_id = request.POST.get("membership_id")
+        if action == "remove" and membership_id:
+            membership = get_object_or_404(existing, pk=membership_id)
+            if membership.user_id == request.user.id:
+                messages.error(request, "You cannot remove your own client access here.")
+            elif membership.role == CompanyMembership.ROLE_CLIENT_ADMIN and not is_account_admin:
+                messages.error(request, "Only the G Fleet IQ owner or an administrator can remove a client administrator.")
+            else:
+                membership.delete()
+                messages.success(request, "Client access removed.")
+            return redirect("client_team", company_id=company.id)
+
+        username = request.POST.get("username", "").strip()
+        role = request.POST.get("role", CompanyMembership.ROLE_VIEWER)
+        allowed_roles = dict(CompanyMembership.ROLE_CHOICES)
+        if not is_account_admin:
+            allowed_roles.pop(CompanyMembership.ROLE_CLIENT_ADMIN, None)
+        teammate = User.objects.filter(username__iexact=username).first()
+        current_membership = CompanyMembership.objects.filter(company=company, user=teammate).first() if teammate else None
+
+        if not teammate:
+            messages.error(request, "That username is not registered yet. Ask them to create an account first.")
+        elif role not in allowed_roles:
+            messages.error(request, "You do not have permission to grant that access level.")
+        elif current_membership and current_membership.role == CompanyMembership.ROLE_CLIENT_ADMIN and not is_account_admin:
+            messages.error(request, "Only the G Fleet IQ owner or an administrator can change a client administrator’s access.")
+        else:
+            CompanyMembership.objects.update_or_create(
+                user=teammate,
+                company=company,
+                defaults={"role": role, "active": True},
+            )
+            messages.success(request, f"{teammate.username} now has {dict(CompanyMembership.ROLE_CHOICES)[role]} access for {company.name}.")
+        return redirect("client_team", company_id=company.id)
+
+    roles = CompanyMembership.ROLE_CHOICES if is_account_admin else [
+        choice for choice in CompanyMembership.ROLE_CHOICES
+        if choice[0] != CompanyMembership.ROLE_CLIENT_ADMIN
+    ]
+    return render(request, "dashboard/client_team.html", {
+        "company": company,
+        "memberships": existing.order_by("joined_at"),
+        "roles": roles,
+    })
+
 def home(request):
-    all_loads = list(Load.objects.all())
+    all_loads = list(_scope_queryset(request, Load))
 
     total_revenue = 0
     total_profit = 0
@@ -64,11 +247,11 @@ def home(request):
     )
 
     context = {
-        "drivers": Driver.objects.count(),
-        "trucks": Truck.objects.count(),
-        "trailers": Trailer.objects.count(),
-        "loads": Load.objects.count(),
-        "customers": Customer.objects.count(),
+        "drivers": _scope_queryset(request, Driver).count(),
+        "trucks": _scope_queryset(request, Truck).count(),
+        "trailers": _scope_queryset(request, Trailer).count(),
+        "loads": _scope_queryset(request, Load).count(),
+        "customers": _scope_queryset(request, Customer).count(),
 
         "total_revenue": total_revenue,
         "total_profit": total_profit,
@@ -93,12 +276,12 @@ def drivers(request):
     return render(
         request,
         "dashboard/drivers.html",
-        {"drivers": Driver.objects.all()},
+        {"drivers": _scope_queryset(request, Driver)},
     )
 
 
 def add_driver(request):
-    form = DriverForm(request.POST or None)
+    form = DriverForm(request.POST or None, account=request.account, client_company_ids=_form_company_ids(request))
 
     if request.method == "POST" and form.is_valid():
         driver = form.save(commit=False)
@@ -108,6 +291,7 @@ def add_driver(request):
             driver.latitude = location_result["latitude"]
             driver.longitude = location_result["longitude"]
 
+        driver.account = request.account
         driver.save()
         return redirect("drivers")
 
@@ -119,11 +303,13 @@ def add_driver(request):
 
 
 def edit_driver(request, driver_id):
-    driver = get_object_or_404(Driver, id=driver_id)
+    driver = get_object_or_404(_scope_queryset(request, Driver), id=driver_id)
 
     form = DriverForm(
         request.POST or None,
         instance=driver,
+        account=request.account,
+        client_company_ids=_form_company_ids(request),
     )
 
     if request.method == "POST" and form.is_valid():
@@ -148,7 +334,7 @@ def edit_driver(request, driver_id):
 
 
 def delete_driver(request, driver_id):
-    driver = get_object_or_404(Driver, id=driver_id)
+    driver = get_object_or_404(_scope_queryset(request, Driver), id=driver_id)
 
     if request.method == "POST":
         driver.delete()
@@ -167,25 +353,42 @@ def delete_driver(request, driver_id):
 
 def customers(request):
     if request.method == "POST":
-        form = CustomerForm(request.POST)
+        form = CustomerForm(request.POST, account=request.account, client_company_ids=_form_company_ids(request))
         if form.is_valid():
-            form.save()
+            customer = form.save(commit=False)
+            customer.account = request.account
+            customer.save()
             return redirect("customers")
     else:
-        form = CustomerForm()
+        form = CustomerForm(account=request.account, client_company_ids=_form_company_ids(request))
 
     return render(
         request,
         "dashboard/customers.html",
         {
-            "customers": Customer.objects.all(),
+            "customers": _scope_queryset(request, Customer),
             "form": form,
         },
     )
 
 
+def edit_customer(request, customer_id):
+    customer = get_object_or_404(_scope_queryset(request, Customer), id=customer_id)
+    form = CustomerForm(request.POST or None, instance=customer, account=request.account, client_company_ids=_form_company_ids(request))
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        return redirect("customers")
+
+    return render(
+        request,
+        "dashboard/edit_customer.html",
+        {"customer": customer, "form": form},
+    )
+
+
 def delete_customer(request, customer_id):
-    customer = get_object_or_404(Customer, id=customer_id)
+    customer = get_object_or_404(_scope_queryset(request, Customer), id=customer_id)
 
     if request.method == "POST":
         customer.delete()
@@ -206,15 +409,17 @@ def trucks(request):
     return render(
         request,
         "dashboard/trucks.html",
-        {"trucks": Truck.objects.all()},
+        {"trucks": _scope_queryset(request, Truck)},
     )
 
 
 def add_truck(request):
-    form = TruckForm(request.POST or None)
+    form = TruckForm(request.POST or None, account=request.account, client_company_ids=_form_company_ids(request))
 
     if request.method == "POST" and form.is_valid():
-        form.save()
+        truck = form.save(commit=False)
+        truck.account = request.account
+        truck.save()
         return redirect("trucks")
 
     return render(
@@ -225,11 +430,13 @@ def add_truck(request):
 
 
 def edit_truck(request, truck_id):
-    truck = get_object_or_404(Truck, id=truck_id)
+    truck = get_object_or_404(_scope_queryset(request, Truck), id=truck_id)
 
     form = TruckForm(
         request.POST or None,
         instance=truck,
+        account=request.account,
+        client_company_ids=_form_company_ids(request),
     )
 
     if request.method == "POST" and form.is_valid():
@@ -247,7 +454,7 @@ def edit_truck(request, truck_id):
 
 
 def delete_truck(request, truck_id):
-    truck = get_object_or_404(Truck, id=truck_id)
+    truck = get_object_or_404(_scope_queryset(request, Truck), id=truck_id)
 
     if request.method == "POST":
         truck.delete()
@@ -268,15 +475,17 @@ def trailers(request):
     return render(
         request,
         "dashboard/trailers.html",
-        {"trailers": Trailer.objects.all()},
+        {"trailers": _scope_queryset(request, Trailer)},
     )
 
 
 def add_trailer(request):
-    form = TrailerForm(request.POST or None)
+    form = TrailerForm(request.POST or None, account=request.account, client_company_ids=_form_company_ids(request))
 
     if request.method == "POST" and form.is_valid():
-        form.save()
+        trailer = form.save(commit=False)
+        trailer.account = request.account
+        trailer.save()
         return redirect("trailers")
 
     return render(
@@ -287,11 +496,13 @@ def add_trailer(request):
 
 
 def edit_trailer(request, trailer_id):
-    trailer = get_object_or_404(Trailer, id=trailer_id)
+    trailer = get_object_or_404(_scope_queryset(request, Trailer), id=trailer_id)
 
     form = TrailerForm(
         request.POST or None,
         instance=trailer,
+        account=request.account,
+        client_company_ids=_form_company_ids(request),
     )
 
     if request.method == "POST" and form.is_valid():
@@ -309,7 +520,7 @@ def edit_trailer(request, trailer_id):
 
 
 def delete_trailer(request, trailer_id):
-    trailer = get_object_or_404(Trailer, id=trailer_id)
+    trailer = get_object_or_404(_scope_queryset(request, Trailer), id=trailer_id)
 
     if request.method == "POST":
         trailer.delete()
@@ -328,10 +539,12 @@ def delete_trailer(request, trailer_id):
 
 def loads(request):
     if request.method == "POST":
-        form = LoadForm(request.POST)
+        form = LoadForm(request.POST, account=request.account, client_company_ids=_form_company_ids(request))
 
         if form.is_valid():
             load = form.save(commit=False)
+            load.account = request.account
+            load.company = load.customer.company
 
             pickup_result = geocode_address(load.pickup)
             delivery_result = geocode_address(load.delivery)
@@ -347,32 +560,77 @@ def loads(request):
             load.save()
             return redirect("loads")
     else:
-        form = LoadForm()
+        form = LoadForm(account=request.account, client_company_ids=_form_company_ids(request))
 
     return render(
         request,
         "dashboard/loads.html",
         {
-            "loads": Load.objects.all(),
+            "loads": _scope_queryset(request, Load),
             "form": form,
         },
     )
 def load_detail(request, load_id):
-    load = get_object_or_404(Load, id=load_id)
+    load = get_object_or_404(_scope_queryset(request, Load), id=load_id)
 
     return render(
         request,
         "dashboard/load_detail.html",
         {"load": load},
     )
+
+
+def complete_load(request, load_id):
+    if request.method != "POST":
+        return redirect("load_detail", load_id=load_id)
+
+    load = get_object_or_404(_scope_queryset(request, Load), id=load_id)
+    if load.status != "Assigned":
+        messages.error(request, "Only an assigned load can be marked delivered.")
+        return redirect("load_detail", load_id=load.id)
+
+    with transaction.atomic():
+        load.status = "Delivered"
+        load.save(update_fields=["status"])
+
+        if load.driver_id:
+            Driver.objects.filter(
+                id=load.driver_id,
+                account=request.account,
+                company_id=load.company_id,
+            ).update(
+                available=True,
+                status="Available",
+            )
+        if load.truck_id:
+            Truck.objects.filter(
+                id=load.truck_id,
+                account=request.account,
+                company_id=load.company_id,
+            ).update(active=True)
+        if load.trailer_id:
+            Trailer.objects.filter(
+                id=load.trailer_id,
+                account=request.account,
+                company_id=load.company_id,
+            ).update(available=True)
+
+    messages.success(
+        request,
+        "Load marked delivered. Its driver, truck, and trailer are available again.",
+    )
+    return redirect("load_detail", load_id=load.id)
+
+
 def edit_load(request, load_id):
-    load = get_object_or_404(Load, id=load_id)
+    load = get_object_or_404(_scope_queryset(request, Load), id=load_id)
 
     if request.method == "POST":
-        form = LoadForm(request.POST, instance=load)
+        form = LoadForm(request.POST, instance=load, account=request.account, client_company_ids=_form_company_ids(request))
 
         if form.is_valid():
             load = form.save(commit=False)
+            load.company = load.customer.company
 
             pickup_result = geocode_address(load.pickup)
             delivery_result = geocode_address(load.delivery)
@@ -392,7 +650,7 @@ def edit_load(request, load_id):
             return redirect("load_detail", load_id=load.id)
 
     else:
-        form = LoadForm(instance=load)
+        form = LoadForm(instance=load, account=request.account, client_company_ids=_form_company_ids(request))
 
     return render(
         request,
@@ -405,7 +663,7 @@ def edit_load(request, load_id):
 
 
 def delete_load(request, load_id):
-    load = get_object_or_404(Load, id=load_id)
+    load = get_object_or_404(_scope_queryset(request, Load), id=load_id)
 
     if request.method == "POST":
         load.delete()
@@ -424,22 +682,22 @@ def delete_load(request, load_id):
 
 def ai_dispatch(request):
     available_drivers = (
-        Driver.objects.filter(
+        _scope_queryset(request, Driver).filter(
             available=True,
             status="Available",
         )
         .order_by("-ai_score", "-hours_remaining")
     )
 
-    available_trucks = Truck.objects.filter(
+    available_trucks = _scope_queryset(request, Truck).filter(
         active=True
     ).order_by("-capacity")
 
-    available_trailers = Trailer.objects.filter(
+    available_trailers = _scope_queryset(request, Trailer).filter(
         available=True
     ).order_by("-capacity")
 
-    available_loads = Load.objects.filter(
+    available_loads = _scope_queryset(request, Load).filter(
         status="Available"
     ).order_by(
         "-priority",
@@ -534,10 +792,10 @@ def ai_dispatch(request):
 
 def dispatch_board(request):
 
-    available_drivers = Driver.objects.filter(
+    available_drivers = list(_scope_queryset(request, Driver).filter(
         available=True,
         status="Available",
-    )
+    ))
 
     for driver in available_drivers:
 
@@ -560,15 +818,12 @@ def dispatch_board(request):
 
         driver.ai_score = score
 
-        driver.save(
-            update_fields=["ai_score"]
-        )
 
     # ==========================================================
     # AI PLANS
     # ==========================================================
 
-    all_loads = Load.objects.filter(
+    all_loads = _scope_queryset(request, Load).filter(
         status="Available"
     )
 
@@ -680,20 +935,16 @@ def dispatch_board(request):
     # RECOMMENDATIONS
     # =========================================================
 
-    recommended_driver = (
-        available_drivers
-        .order_by("-ai_score")
-        .first()
-    )
+    recommended_driver = max(available_drivers, key=lambda driver: driver.ai_score, default=None)
 
     recommended_truck = (
-        Truck.objects
+        _scope_queryset(request, Truck)
         .filter(active=True)
         .first()
     )
 
     recommended_trailer = (
-        Trailer.objects
+        _scope_queryset(request, Trailer)
         .filter(available=True)
         .first()
     )
@@ -703,10 +954,10 @@ def dispatch_board(request):
     # ==========================================================
 
     context = {
-        "loads": Load.objects.all(),
+        "loads": _scope_queryset(request, Load),
         "drivers": available_drivers,
-        "trucks": Truck.objects.all(),
-        "trailers": Trailer.objects.all(),
+        "trucks": _scope_queryset(request, Truck),
+        "trailers": _scope_queryset(request, Trailer),
         "plans": plans,
         "best_plan": best_plan,
         "best_fuel_stop": best_fuel_stop,
@@ -728,10 +979,10 @@ def dispatch_board(request):
 
 def assign_load(request, load_id):
 
-    load = get_object_or_404(
-        Load,
-        id=load_id,
-    )
+    if request.method != "POST":
+        return redirect("dispatch_board")
+
+    load = get_object_or_404(_scope_queryset(request, Load, writable=True), id=load_id)
 
     driver = select_best_driver(load)
     truck = select_best_truck(load)
@@ -789,7 +1040,10 @@ def assign_load(request, load_id):
 # ==========================================================
 
 def plan_all_loads(request):
-    loads_to_plan = Load.objects.filter(status="Available")
+    if request.method != "POST":
+        return redirect("dispatch_board")
+
+    loads_to_plan = _scope_queryset(request, Load, writable=True).filter(status="Available")
 
     for load in loads_to_plan:
         driver = select_best_driver(load)
@@ -824,7 +1078,7 @@ def dispatch_recommended_load(request):
     if request.method != "POST":
         return redirect("dispatch_board")
 
-    plans = build_plans(Load.objects.all())
+    plans = build_plans(_scope_queryset(request, Load, writable=True))
 
     if not plans:
         return redirect("dispatch_board")
@@ -866,7 +1120,9 @@ def companies(request):
     if request.method == "POST":
         form = CompanyForm(request.POST)
         if form.is_valid():
-            form.save()
+            company = form.save(commit=False)
+            company.account = request.account
+            company.save()
             return redirect("companies")
     else:
         form = CompanyForm()
@@ -875,9 +1131,24 @@ def companies(request):
         request,
         "dashboard/companies.html",
         {
-            "companies": Company.objects.all(),
+            "companies": Company.objects.filter(account=request.account),
             "form": form,
         },
+    )
+
+
+def edit_company(request, company_id):
+    company = get_object_or_404(Company, id=company_id, account=request.account)
+    form = CompanyForm(request.POST or None, instance=company)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        return redirect("companies")
+
+    return render(
+        request,
+        "dashboard/edit_company.html",
+        {"company": company, "form": form},
     )
 
 
@@ -886,7 +1157,7 @@ def companies(request):
 # ==========================================================
 
 def fleet_map(request):
-    trucks = Truck.objects.filter(active=True)
+    trucks = _scope_queryset(request, Truck).filter(active=True)
 
     return render(
         request,
@@ -900,11 +1171,10 @@ def fleet_map(request):
 # ==========================================================
 
 def truck_detail(request, truck_id):
-    truck = get_object_or_404(Truck, id=truck_id)
+    truck = get_object_or_404(_scope_queryset(request, Truck), id=truck_id)
 
     return render(
         request,
         "dashboard/truck_detail.html",
         {"truck": truck},
     )
-   

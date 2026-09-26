@@ -1,0 +1,647 @@
+msgid ""
+msgstr "Project-Id-Version: G Fleet IQ\nLanguage: fr\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "AI Decision Score"
+msgstr "Score de décision IA"
+
+msgid "AI Dispatch"
+msgstr "Répartition IA"
+
+msgid "AI Dispatch Center"
+msgstr "Centre de répartition IA"
+
+msgid "AI Dispatch Platform"
+msgstr "Plateforme de répartition IA"
+
+msgid "AI Dispatch Recommendation"
+msgstr "Recommandation de répartition IA"
+
+msgid "AI Rank"
+msgstr "Classement IA"
+
+msgid "AI Recommendation"
+msgstr "Recommandation IA"
+
+msgid "AI Score"
+msgstr "Score IA"
+
+msgid "AI recommends this fuel stop."
+msgstr "L’IA recommande cet arrêt carburant."
+
+msgid "AI score"
+msgstr "Score IA"
+
+msgid "AI-Powered Fleet Dispatch & Profit Management"
+msgstr "Répartition de flotte et gestion des profits par IA"
+
+msgid "AI-Powered Fleet Management System"
+msgstr "Système de gestion de flotte par IA"
+
+msgid "Actions"
+msgstr "Actions"
+
+msgid "Active"
+msgstr "Actif"
+
+msgid "Active Loads"
+msgstr "Chargements actifs"
+
+msgid "Add Driver"
+msgstr "Ajouter un chauffeur"
+
+msgid "Add New Company"
+msgstr "Ajouter une entreprise"
+
+msgid "Add New Customer"
+msgstr "Ajouter un client"
+
+msgid "Add New Load"
+msgstr "Ajouter un chargement"
+
+msgid "Add Trailer"
+msgstr "Ajouter une remorque"
+
+msgid "Add Truck"
+msgstr "Ajouter un camion"
+
+msgid "All available loads have been dispatched."
+msgstr "Tous les chargements disponibles ont été affectés."
+
+msgid "Already have an account?"
+msgstr "Vous avez déjà un compte ?"
+
+msgid "Are you sure you want to delete"
+msgstr "Voulez-vous vraiment supprimer"
+
+msgid "Are you sure you want to delete this load for"
+msgstr "Voulez-vous vraiment supprimer ce chargement pour"
+
+msgid "Assign Load"
+msgstr "Affecter un chargement"
+
+msgid "Assigned"
+msgstr "Affecté"
+
+msgid "Assigned Loads"
+msgstr "Chargements affectés"
+
+msgid "Availability"
+msgstr "Disponibilité"
+
+msgid "Available"
+msgstr "Disponible"
+
+msgid "Available Drivers"
+msgstr "Chauffeurs disponibles"
+
+msgid "Available Trailers"
+msgstr "Remorques disponibles"
+
+msgid "Available Trucks"
+msgstr "Camions disponibles"
+
+msgid "Average AI Score"
+msgstr "Score IA moyen"
+
+msgid "Average Profit / Load"
+msgstr "Profit moyen par chargement"
+
+msgid "Back to Dashboard"
+msgstr "Retour au tableau de bord"
+
+msgid "Back to Drivers"
+msgstr "Retour aux chauffeurs"
+
+msgid "Back to Loads"
+msgstr "Retour aux chargements"
+
+msgid "Back to Trucks"
+msgstr "Retour aux camions"
+
+msgid "Best Fuel Stop"
+msgstr "Meilleur arrêt carburant"
+
+msgid "Busy"
+msgstr "Occupé"
+
+msgid "Cancel"
+msgstr "Annuler"
+
+msgid "Capacity"
+msgstr "Capacité"
+
+msgid "Choose a username and password to get started."
+msgstr "Choisissez un nom d’utilisateur et un mot de passe pour commencer."
+
+msgid "Command Center"
+msgstr "Centre de contrôle"
+
+msgid "Companies"
+msgstr "Entreprises"
+
+msgid "Company"
+msgstr "Entreprise"
+
+msgid "Company List"
+msgstr "Liste des entreprises"
+
+msgid "Create account"
+msgstr "Créer un compte"
+
+msgid "Create an account"
+msgstr "Créer un compte"
+
+msgid "Create your G Fleet IQ account"
+msgstr "Créez votre compte G Fleet IQ"
+
+msgid "Customer"
+msgstr "Client"
+
+msgid "Customer List"
+msgstr "Liste des clients"
+
+msgid "Customers"
+msgstr "Clients"
+
+msgid "DISPATCH THIS LOAD"
+msgstr "AFFECTER CE CHARGEMENT"
+
+msgid "DOT"
+msgstr "DOT"
+
+msgid "DOT number"
+msgstr "Numéro DOT"
+
+msgid "Dashboard"
+msgstr "Tableau de bord"
+
+msgid "Delete"
+msgstr "Supprimer"
+
+msgid "Delete Customer"
+msgstr "Supprimer le client"
+
+msgid "Delete Driver"
+msgstr "Supprimer le chauffeur"
+
+msgid "Delete Load"
+msgstr "Supprimer le chargement"
+
+msgid "Delete Trailer"
+msgstr "Supprimer la remorque"
+
+msgid "Delete Truck"
+msgstr "Supprimer le camion"
+
+msgid "Delete truck"
+msgstr "Supprimer le camion"
+
+msgid "Delivery"
+msgstr "Livraison"
+
+msgid "Delivery date and time"
+msgstr "Date et heure de livraison"
+
+msgid "Delivery location"
+msgstr "Lieu de livraison"
+
+msgid "Detour"
+msgstr "Détour"
+
+msgid "Diesel"
+msgstr "Diesel"
+
+msgid "Dispatch Board"
+msgstr "Tableau de répartition"
+
+msgid "Distance"
+msgstr "Distance"
+
+msgid "Drive Time"
+msgstr "Temps de conduite"
+
+msgid "Driver"
+msgstr "Chauffeur"
+
+msgid "Driver pay"
+msgstr "Rémunération du chauffeur"
+
+msgid "Driver to Pickup"
+msgstr "Chauffeur jusqu’au lieu d’enlèvement"
+
+msgid "Drivers"
+msgstr "Chauffeurs"
+
+msgid "Drivers Low on Hours"
+msgstr "Chauffeurs avec peu d’heures"
+
+msgid "Edit"
+msgstr "Modifier"
+
+msgid "Edit Company"
+msgstr "Modifier l’entreprise"
+
+msgid "Edit Customer"
+msgstr "Modifier le client"
+
+msgid "Edit Driver"
+msgstr "Modifier le chauffeur"
+
+msgid "Edit Load"
+msgstr "Modifier le chargement"
+
+msgid "Edit Trailer"
+msgstr "Modifier la remorque"
+
+msgid "Edit Truck"
+msgstr "Modifier le camion"
+
+msgid "Email"
+msgstr "E-mail"
+
+msgid "Empty"
+msgstr "Vide"
+
+msgid "Empty Trailers"
+msgstr "Remorques vides"
+
+msgid "Enter G Fleet IQ"
+msgstr "Accéder à G Fleet IQ"
+
+msgid "Enter your account details to continue."
+msgstr "Saisissez les informations de votre compte pour continuer."
+
+msgid "Equipment"
+msgstr "Équipement"
+
+msgid "Executive Performance"
+msgstr "Performance globale"
+
+msgid "Expenses & Profit"
+msgstr "Dépenses et profits"
+
+msgid "Explore how G Fleet IQ manages dispatching, loads, fleet operations and profitability."
+msgstr "Découvrez comment G Fleet IQ gère les expéditions, les chargements, les opérations et la rentabilité de la flotte."
+
+msgid "Fleet Alerts"
+msgstr "Alertes de flotte"
+
+msgid "Fleet Health"
+msgstr "État de la flotte"
+
+msgid "Fleet Map"
+msgstr "Carte de flotte"
+
+msgid "Fleet Overview"
+msgstr "Aperçu de la flotte"
+
+msgid "Fleet Visibility"
+msgstr "Visibilité de la flotte"
+
+msgid "Fuel Needed"
+msgstr "Carburant nécessaire"
+
+msgid "Fuel cost"
+msgstr "Coût du carburant"
+
+msgid "Fuel efficiency"
+msgstr "Efficacité énergétique"
+
+msgid "G Fleet IQ"
+msgstr "G Fleet IQ"
+
+msgid "Home terminal"
+msgstr "Terminal d’attache"
+
+msgid "Hours Remaining"
+msgstr "Heures restantes"
+
+msgid "Hours remaining"
+msgstr "Heures restantes"
+
+msgid "Inactive"
+msgstr "Inactif"
+
+msgid "Insurance"
+msgstr "Assurance"
+
+msgid "Insurance cost"
+msgstr "Coût de l’assurance"
+
+msgid "Intelligent dispatch workflow for your fleet."
+msgstr "Flux de répartition intelligent pour votre flotte."
+
+msgid "Language"
+msgstr "Langue"
+
+msgid "Last inspection"
+msgstr "Dernière inspection"
+
+msgid "Latitude"
+msgstr "Latitude"
+
+msgid "Live Fleet Monitoring"
+msgstr "Suivi en direct de la flotte"
+
+msgid "Load Details"
+msgstr "Détails du chargement"
+
+msgid "Loaded"
+msgstr "Chargé"
+
+msgid "Loads"
+msgstr "Chargements"
+
+msgid "Loads completed"
+msgstr "Chargements terminés"
+
+msgid "Location"
+msgstr "Emplacement"
+
+msgid "Log in"
+msgstr "Se connecter"
+
+msgid "Log in to G Fleet IQ"
+msgstr "Connectez-vous à G Fleet IQ"
+
+msgid "Log out"
+msgstr "Se déconnecter"
+
+msgid "Longitude"
+msgstr "Longitude"
+
+msgid "MC"
+msgstr "MC"
+
+msgid "MC number"
+msgstr "Numéro MC"
+
+msgid "MPG"
+msgstr "MPG"
+
+msgid "Maintenance"
+msgstr "Maintenance"
+
+msgid "Maintenance cost"
+msgstr "Coût de maintenance"
+
+msgid "Manage Loads"
+msgstr "Gérer les chargements"
+
+msgid "Manage loads, drivers, trucks, trailers, dispatching and fleet profitability from one intelligent platform."
+msgstr "Gérez les chargements, chauffeurs, camions, remorques, expéditions et la rentabilité depuis une plateforme intelligente."
+
+msgid "Manage the customers who book your loads."
+msgstr "Gérez les clients qui réservent vos chargements."
+
+msgid "Mark Delivered"
+msgstr "Marquer comme livré"
+
+msgid "Mark this load as delivered and make its assigned equipment available?"
+msgstr "Marquer ce chargement comme livré et libérer l’équipement affecté ?"
+
+msgid "Miles"
+msgstr "Miles"
+
+msgid "Miles today"
+msgstr "Miles du jour"
+
+msgid "Monitor your fleet using the interactive map."
+msgstr "Suivez votre flotte grâce à la carte interactive."
+
+msgid "Name"
+msgstr "Nom"
+
+msgid "New to G Fleet IQ?"
+msgstr "Nouveau sur G Fleet IQ ?"
+
+msgid "Next"
+msgstr "Suivant"
+
+msgid "No Driver"
+msgstr "Aucun chauffeur"
+
+msgid "No Trailer"
+msgstr "Aucune remorque"
+
+msgid "No Truck"
+msgstr "Aucun camion"
+
+msgid "No available drivers."
+msgstr "Aucun chauffeur disponible."
+
+msgid "No available trailers."
+msgstr "Aucune remorque disponible."
+
+msgid "No available trucks."
+msgstr "Aucun camion disponible."
+
+msgid "No companies found."
+msgstr "Aucune entreprise trouvée."
+
+msgid "No customers found."
+msgstr "Aucun client trouvé."
+
+msgid "No drivers found."
+msgstr "Aucun chauffeur trouvé."
+
+msgid "No live fuel station data available yet."
+msgstr "Aucune donnée en direct sur les stations-service pour le moment."
+
+msgid "No loads found."
+msgstr "Aucun chargement trouvé."
+
+msgid "No recent loads."
+msgstr "Aucun chargement récent."
+
+msgid "No trailers found."
+msgstr "Aucune remorque trouvée."
+
+msgid "No trucks found."
+msgstr "Aucun camion trouvé."
+
+msgid "Open Dispatch Board"
+msgstr "Ouvrir le tableau de répartition"
+
+msgid "Out of Service"
+msgstr "Hors service"
+
+msgid "Password"
+msgstr "Mot de passe"
+
+msgid "Pause"
+msgstr "Pause"
+
+msgid "Phone"
+msgstr "Téléphone"
+
+msgid "Pickup"
+msgstr "Enlèvement"
+
+msgid "Pickup ETA"
+msgstr "Heure d’arrivée estimée"
+
+msgid "Pickup date and time"
+msgstr "Date et heure d’enlèvement"
+
+msgid "Pickup location"
+msgstr "Lieu d’enlèvement"
+
+msgid "Play"
+msgstr "Lire"
+
+msgid "Previous"
+msgstr "Précédent"
+
+msgid "Priority"
+msgstr "Priorité"
+
+msgid "Profit"
+msgstr "Profit"
+
+msgid "Profit Intelligence"
+msgstr "Analyse des profits"
+
+msgid "Profit per Mile"
+msgstr "Profit par mile"
+
+msgid "Profit/Mile"
+msgstr "Profit par mile"
+
+msgid "Quick Actions"
+msgstr "Actions rapides"
+
+msgid "Rate"
+msgstr "Tarif"
+
+msgid "Recent Drivers"
+msgstr "Chauffeurs récents"
+
+msgid "Recent Loads"
+msgstr "Chargements récents"
+
+msgid "Recommended Driver"
+msgstr "Chauffeur recommandé"
+
+msgid "Recommended Load"
+msgstr "Chargement recommandé"
+
+msgid "Recommended Trailer"
+msgstr "Remorque recommandée"
+
+msgid "Recommended Truck"
+msgstr "Camion recommandé"
+
+msgid "Revenue"
+msgstr "Revenu"
+
+msgid "Save Changes"
+msgstr "Enregistrer les modifications"
+
+msgid "Save Company"
+msgstr "Enregistrer l’entreprise"
+
+msgid "Save Customer"
+msgstr "Enregistrer le client"
+
+msgid "Save Driver"
+msgstr "Enregistrer le chauffeur"
+
+msgid "Save Load"
+msgstr "Enregistrer le chargement"
+
+msgid "Save Trailer"
+msgstr "Enregistrer la remorque"
+
+msgid "Save Truck"
+msgstr "Enregistrer le camion"
+
+msgid "See G Fleet IQ in Action"
+msgstr "Découvrez G Fleet IQ en action"
+
+msgid "Shift end"
+msgstr "Fin du quart"
+
+msgid "Shift start"
+msgstr "Début du quart"
+
+msgid "Status"
+msgstr "Statut"
+
+msgid "There are no loads waiting for AI assignment right now."
+msgstr "Aucun chargement n’attend actuellement une affectation par l’IA."
+
+msgid "Tolls"
+msgstr "Péages"
+
+msgid "Total Profit"
+msgstr "Profit total"
+
+msgid "Total Revenue"
+msgstr "Revenu total"
+
+msgid "Track revenue, costs and load profitability."
+msgstr "Suivez les revenus, les coûts et la rentabilité des chargements."
+
+msgid "Trailer"
+msgstr "Remorque"
+
+msgid "Trailer number"
+msgstr "Numéro de remorque"
+
+msgid "Trailers"
+msgstr "Remorques"
+
+msgid "Truck"
+msgstr "Camion"
+
+msgid "Truck Information"
+msgstr "Informations du camion"
+
+msgid "Truck Information Center"
+msgstr "Centre d’information du camion"
+
+msgid "Truck Number"
+msgstr "Numéro du camion"
+
+msgid "Truck Stops"
+msgstr "Relais routiers"
+
+msgid "Truck capacity"
+msgstr "Capacité du camion"
+
+msgid "Trucks"
+msgstr "Camions"
+
+msgid "Trucks in Maintenance"
+msgstr "Camions en maintenance"
+
+msgid "Unit number"
+msgstr "Numéro d’unité"
+
+msgid "Update Location"
+msgstr "Mettre à jour l’emplacement"
+
+msgid "Username"
+msgstr "Nom d’utilisateur"
+
+msgid "Utilization"
+msgstr "Utilisation"
+
+msgid "View Details"
+msgstr "Voir les détails"
+
+msgid "View Documents"
+msgstr "Afficher les documents"
+
+msgid "Weight"
+msgstr "Poids"
+
+msgid "Why AI Selected This Load"
+msgstr "Pourquoi l’IA a choisi ce chargement"
+
+msgid "Yes, Delete"
+msgstr "Oui, supprimer"
+
+msgid "Your account is ready. Welcome to G Fleet IQ!"
+msgstr "Votre compte est prêt. Bienvenue sur G Fleet IQ !"

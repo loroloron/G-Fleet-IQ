@@ -84,7 +84,11 @@ def plan_all_loads(loads):
         # DRIVER
         # ==================================================
 
-        if load.driver:
+        if (
+            load.driver
+            and load.driver.account_id == load.account_id
+            and load.driver.company_id == load.company_id
+        ):
             driver = load.driver
         else:
             driver = select_best_driver(load)

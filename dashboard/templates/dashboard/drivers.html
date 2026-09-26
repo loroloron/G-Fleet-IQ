@@ -1,12 +1,13 @@
 {% extends "dashboard/base.html" %}
+{% load i18n %}
 
 {% block content %}
 
-<h1 class="mb-4">👤 Drivers</h1>
+<h1 class="mb-4">👤 {% translate "Drivers" %}</h1>
 
 <div class="mb-3">
     <a href="{% url 'add_driver' %}" class="btn btn-primary">
-        ➕ Add Driver
+        ➕ {% translate "Add Driver" %}
     </a>
 </div>
 
@@ -14,11 +15,11 @@
 
     <thead>
         <tr>
-            <th>Name</th>
-            <th>Location</th>
-            <th>Available</th>
-            <th>Truck</th>
-            <th>Actions</th>
+            <th>{% translate "Name" %}</th>
+            <th>{% translate "Location" %}</th>
+            <th>{% translate "Available" %}</th>
+            <th>{% translate "Truck" %}</th>
+            <th>{% translate "Actions" %}</th>
         </tr>
     </thead>
 
@@ -33,9 +34,9 @@
 
         <td>
             {% if driver.available %}
-                <span class="badge bg-success">Available</span>
+                <span class="badge bg-success">{% translate "Available" %}</span>
             {% else %}
-                <span class="badge bg-danger">Busy</span>
+                <span class="badge bg-danger">{% translate "Busy" %}</span>
             {% endif %}
         </td>
 
@@ -46,12 +47,12 @@
         <td>
             <a href="{% url 'edit_driver' driver.id %}"
                class="btn btn-warning btn-sm">
-                ✏️ Edit
+                ✏️ {% translate "Edit" %}
             </a>
 
             <a href="{% url 'delete_driver' driver.id %}"
                class="btn btn-danger btn-sm">
-                🗑️ Delete
+                🗑️ {% translate "Delete" %}
             </a>
         </td>
     </tr>
@@ -59,7 +60,7 @@
     {% empty %}
 
     <tr>
-        <td colspan="5">No drivers found.</td>
+        <td colspan="5">{% translate "No drivers found." %}</td>
     </tr>
 
     {% endfor %}

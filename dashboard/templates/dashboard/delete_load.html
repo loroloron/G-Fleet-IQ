@@ -1,15 +1,16 @@
 {% extends "dashboard/base.html" %}
+{% load i18n %}
 
 {% block content %}
 
-<h1 class="mb-4">🗑️ Delete Load</h1>
+<h1 class="mb-4">🗑️ {% translate "Delete Load" %}</h1>
 
 <div class="card shadow">
 
     <div class="card-body">
 
         <p>
-            Are you sure you want to delete this load for
+            {% translate "Are you sure you want to delete this load for" %}
             <strong>{{ load.customer }}</strong>?
         </p>
 
@@ -18,11 +19,11 @@
             {% csrf_token %}
 
             <button type="submit" class="btn btn-danger">
-                🗑️ Delete Load
+                🗑️ {% translate "Delete Load" %}
             </button>
 
             <a href="{% url 'loads' %}" class="btn btn-secondary">
-                Cancel
+                {% translate "Cancel" %}
             </a>
 
         </form>

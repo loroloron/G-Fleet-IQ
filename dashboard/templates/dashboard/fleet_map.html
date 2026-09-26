@@ -1,4 +1,5 @@
 {% extends "dashboard/base.html" %}
+{% load i18n %}
 
 {% block content %}
 
@@ -7,8 +8,8 @@ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h2>🗺️ Fleet Map</h2>
-        <p class="text-muted">Live Fleet Monitoring</p>
+        <h2>🗺️ {% translate "Fleet Map" %}</h2>
+        <p class="text-muted">{% translate "Live Fleet Monitoring" %}</p>
     </div>
 </div>
 
@@ -46,11 +47,11 @@ L.marker([
 
         <hr>
 
-        <b>Status:</b> {{ truck.status }}<br>
+        <b>{% translate "Status" %}:</b> {{ truck.status }}<br>
 
-        <b>Latitude:</b> {{ truck.latitude }}<br>
+        <b>{% translate "Latitude" %}:</b> {{ truck.latitude }}<br>
 
-        <b>Longitude:</b> {{ truck.longitude }}<br>
+        <b>{% translate "Longitude" %}:</b> {{ truck.longitude }}<br>
 
         <hr>
 

@@ -1,8 +1,9 @@
 {% extends "dashboard/base.html" %}
+{% load i18n %}
 
 {% block content %}
 
-<h1 class="mb-4">🗑️ Delete Trailer</h1>
+<h1 class="mb-4">🗑️ {% translate "Delete Trailer" %}</h1>
 
 <div class="card shadow">
 
@@ -10,7 +11,7 @@
 
         <p>
             Are you sure you want to delete
-            <strong>{{ trailer }}</strong>?
+                <strong>{{ trailer }}</strong>?
         </p>
 
         <form method="POST">
@@ -19,12 +20,12 @@
 
             <button type="submit"
                     class="btn btn-danger">
-                🗑️ Delete Trailer
+                🗑️ {% translate "Delete Trailer" %}
             </button>
 
             <a href="{% url 'trailers' %}"
                class="btn btn-secondary">
-                Cancel
+                {% translate "Cancel" %}
             </a>
 
         </form>

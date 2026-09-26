@@ -1,8 +1,9 @@
 {% extends "dashboard/base.html" %}
+{% load i18n %}
 
 {% block content %}
 
-<h1 class="mb-4">👤 Add Driver</h1>
+<h1 class="mb-4">👤 {% translate "Add Driver" %}</h1>
 
 <div class="card shadow">
 
@@ -19,11 +20,11 @@
             {{ form.as_p }}
 
             <button type="submit" class="btn btn-primary">
-                💾 Save Driver
+                💾 {% translate "Save Driver" %}
             </button>
 
             <a href="{% url 'drivers' %}" class="btn btn-secondary">
-                ← Back to Drivers
+                ← {% translate "Back to Drivers" %}
             </a>
 
         </form>

@@ -1,5 +1,25 @@
 from django.contrib import admin
-from .models import Company, Truck, Trailer, Driver, Customer, Load
+from .models import AccountMembership, Company, CompanyMembership, FleetAccount, Truck, Trailer, Driver, Customer, Load
+
+
+@admin.register(FleetAccount)
+class FleetAccountAdmin(admin.ModelAdmin):
+    list_display = ("name", "created_at")
+    search_fields = ("name",)
+
+
+@admin.register(AccountMembership)
+class AccountMembershipAdmin(admin.ModelAdmin):
+    list_display = ("user", "account", "role", "active", "joined_at")
+    list_filter = ("account", "role", "active")
+    search_fields = ("user__username", "account__name")
+
+
+@admin.register(CompanyMembership)
+class CompanyMembershipAdmin(admin.ModelAdmin):
+    list_display = ("user", "company", "role", "active", "joined_at")
+    list_filter = ("company", "role", "active")
+    search_fields = ("user__username", "company__name")
 
 
 @admin.register(Company)

@@ -1,0 +1,19 @@
+{% extends "dashboard/base.html" %}
+{% load i18n %}
+
+{% block content %}
+
+<h1 class="mb-4">✏️ {% translate "Edit Company" %}</h1>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-success">💾 {% translate "Save Changes" %}</button>
+            <a href="{% url 'companies' %}" class="btn btn-secondary">{% translate "Cancel" %}</a>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

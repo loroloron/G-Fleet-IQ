@@ -1,0 +1,647 @@
+msgid ""
+msgstr "Project-Id-Version: G Fleet IQ\nLanguage: hi\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "AI Decision Score"
+msgstr "एआई निर्णय स्कोर"
+
+msgid "AI Dispatch"
+msgstr "एआई डिस्पैच"
+
+msgid "AI Dispatch Center"
+msgstr "एआई डिस्पैच केंद्र"
+
+msgid "AI Dispatch Platform"
+msgstr "एआई डिस्पैच प्लेटफ़ॉर्म"
+
+msgid "AI Dispatch Recommendation"
+msgstr "एआई डिस्पैच सुझाव"
+
+msgid "AI Rank"
+msgstr "एआई रैंक"
+
+msgid "AI Recommendation"
+msgstr "एआई सुझाव"
+
+msgid "AI Score"
+msgstr "एआई स्कोर"
+
+msgid "AI recommends this fuel stop."
+msgstr "एआई इस ईंधन स्टॉप की सलाह देता है।"
+
+msgid "AI score"
+msgstr "एआई स्कोर"
+
+msgid "AI-Powered Fleet Dispatch & Profit Management"
+msgstr "एआई-संचालित बेड़ा डिस्पैच और लाभ प्रबंधन"
+
+msgid "AI-Powered Fleet Management System"
+msgstr "एआई-संचालित बेड़ा प्रबंधन प्रणाली"
+
+msgid "Actions"
+msgstr "कार्रवाइयाँ"
+
+msgid "Active"
+msgstr "सक्रिय"
+
+msgid "Active Loads"
+msgstr "सक्रिय लोड"
+
+msgid "Add Driver"
+msgstr "चालक जोड़ें"
+
+msgid "Add New Company"
+msgstr "कंपनी जोड़ें"
+
+msgid "Add New Customer"
+msgstr "नया ग्राहक जोड़ें"
+
+msgid "Add New Load"
+msgstr "नया लोड जोड़ें"
+
+msgid "Add Trailer"
+msgstr "ट्रेलर जोड़ें"
+
+msgid "Add Truck"
+msgstr "ट्रक जोड़ें"
+
+msgid "All available loads have been dispatched."
+msgstr "सभी उपलब्ध लोड डिस्पैच हो चुके हैं।"
+
+msgid "Already have an account?"
+msgstr "क्या आपका पहले से खाता है?"
+
+msgid "Are you sure you want to delete"
+msgstr "क्या आप वाकई हटाना चाहते हैं"
+
+msgid "Are you sure you want to delete this load for"
+msgstr "क्या आप इस ग्राहक का लोड हटाना चाहते हैं"
+
+msgid "Assign Load"
+msgstr "लोड असाइन करें"
+
+msgid "Assigned"
+msgstr "असाइन किया गया"
+
+msgid "Assigned Loads"
+msgstr "असाइन किए गए लोड"
+
+msgid "Availability"
+msgstr "उपलब्धता"
+
+msgid "Available"
+msgstr "उपलब्ध"
+
+msgid "Available Drivers"
+msgstr "उपलब्ध चालक"
+
+msgid "Available Trailers"
+msgstr "उपलब्ध ट्रेलर"
+
+msgid "Available Trucks"
+msgstr "उपलब्ध ट्रक"
+
+msgid "Average AI Score"
+msgstr "औसत एआई स्कोर"
+
+msgid "Average Profit / Load"
+msgstr "प्रति लोड औसत लाभ"
+
+msgid "Back to Dashboard"
+msgstr "डैशबोर्ड पर वापस जाएँ"
+
+msgid "Back to Drivers"
+msgstr "चालकों पर वापस जाएँ"
+
+msgid "Back to Loads"
+msgstr "लोड पर वापस जाएँ"
+
+msgid "Back to Trucks"
+msgstr "ट्रकों पर वापस जाएँ"
+
+msgid "Best Fuel Stop"
+msgstr "सबसे अच्छा ईंधन स्टॉप"
+
+msgid "Busy"
+msgstr "व्यस्त"
+
+msgid "Cancel"
+msgstr "रद्द करें"
+
+msgid "Capacity"
+msgstr "क्षमता"
+
+msgid "Choose a username and password to get started."
+msgstr "शुरू करने के लिए उपयोगकर्ता नाम और पासवर्ड चुनें।"
+
+msgid "Command Center"
+msgstr "कमांड सेंटर"
+
+msgid "Companies"
+msgstr "कंपनियाँ"
+
+msgid "Company"
+msgstr "कंपनी"
+
+msgid "Company List"
+msgstr "कंपनी सूची"
+
+msgid "Create account"
+msgstr "खाता बनाएँ"
+
+msgid "Create an account"
+msgstr "खाता बनाएँ"
+
+msgid "Create your G Fleet IQ account"
+msgstr "अपना G Fleet IQ खाता बनाएँ"
+
+msgid "Customer"
+msgstr "ग्राहक"
+
+msgid "Customer List"
+msgstr "ग्राहक सूची"
+
+msgid "Customers"
+msgstr "ग्राहक"
+
+msgid "DISPATCH THIS LOAD"
+msgstr "इस लोड को डिस्पैच करें"
+
+msgid "DOT"
+msgstr "DOT"
+
+msgid "DOT number"
+msgstr "DOT नंबर"
+
+msgid "Dashboard"
+msgstr "डैशबोर्ड"
+
+msgid "Delete"
+msgstr "हटाएँ"
+
+msgid "Delete Customer"
+msgstr "ग्राहक हटाएँ"
+
+msgid "Delete Driver"
+msgstr "चालक हटाएँ"
+
+msgid "Delete Load"
+msgstr "लोड हटाएँ"
+
+msgid "Delete Trailer"
+msgstr "ट्रेलर हटाएँ"
+
+msgid "Delete Truck"
+msgstr "ट्रक हटाएँ"
+
+msgid "Delete truck"
+msgstr "ट्रक हटाएँ"
+
+msgid "Delivery"
+msgstr "डिलीवरी"
+
+msgid "Delivery date and time"
+msgstr "डिलीवरी की तारीख और समय"
+
+msgid "Delivery location"
+msgstr "डिलीवरी स्थान"
+
+msgid "Detour"
+msgstr "डिटूर"
+
+msgid "Diesel"
+msgstr "डीज़ल"
+
+msgid "Dispatch Board"
+msgstr "डिस्पैच बोर्ड"
+
+msgid "Distance"
+msgstr "दूरी"
+
+msgid "Drive Time"
+msgstr "ड्राइव समय"
+
+msgid "Driver"
+msgstr "चालक"
+
+msgid "Driver pay"
+msgstr "चालक का वेतन"
+
+msgid "Driver to Pickup"
+msgstr "पिकअप तक चालक"
+
+msgid "Drivers"
+msgstr "चालक"
+
+msgid "Drivers Low on Hours"
+msgstr "कम घंटे शेष वाले चालक"
+
+msgid "Edit"
+msgstr "संपादित करें"
+
+msgid "Edit Company"
+msgstr "कंपनी संपादित करें"
+
+msgid "Edit Customer"
+msgstr "ग्राहक संपादित करें"
+
+msgid "Edit Driver"
+msgstr "चालक संपादित करें"
+
+msgid "Edit Load"
+msgstr "लोड संपादित करें"
+
+msgid "Edit Trailer"
+msgstr "ट्रेलर संपादित करें"
+
+msgid "Edit Truck"
+msgstr "ट्रक संपादित करें"
+
+msgid "Email"
+msgstr "ईमेल"
+
+msgid "Empty"
+msgstr "खाली"
+
+msgid "Empty Trailers"
+msgstr "खाली ट्रेलर"
+
+msgid "Enter G Fleet IQ"
+msgstr "G Fleet IQ खोलें"
+
+msgid "Enter your account details to continue."
+msgstr "जारी रखने के लिए अपने खाते का विवरण दर्ज करें।"
+
+msgid "Equipment"
+msgstr "उपकरण"
+
+msgid "Executive Performance"
+msgstr "कार्यकारी प्रदर्शन"
+
+msgid "Expenses & Profit"
+msgstr "खर्च और लाभ"
+
+msgid "Explore how G Fleet IQ manages dispatching, loads, fleet operations and profitability."
+msgstr "जानें कि G Fleet IQ डिस्पैच, लोड, बेड़े के संचालन और लाभप्रदता को कैसे प्रबंधित करता है।"
+
+msgid "Fleet Alerts"
+msgstr "बेड़े की चेतावनियाँ"
+
+msgid "Fleet Health"
+msgstr "बेड़े की स्थिति"
+
+msgid "Fleet Map"
+msgstr "बेड़े का मानचित्र"
+
+msgid "Fleet Overview"
+msgstr "बेड़े का अवलोकन"
+
+msgid "Fleet Visibility"
+msgstr "बेड़े की दृश्यता"
+
+msgid "Fuel Needed"
+msgstr "आवश्यक ईंधन"
+
+msgid "Fuel cost"
+msgstr "ईंधन लागत"
+
+msgid "Fuel efficiency"
+msgstr "ईंधन दक्षता"
+
+msgid "G Fleet IQ"
+msgstr "G Fleet IQ"
+
+msgid "Home terminal"
+msgstr "होम टर्मिनल"
+
+msgid "Hours Remaining"
+msgstr "शेष घंटे"
+
+msgid "Hours remaining"
+msgstr "शेष घंटे"
+
+msgid "Inactive"
+msgstr "निष्क्रिय"
+
+msgid "Insurance"
+msgstr "बीमा"
+
+msgid "Insurance cost"
+msgstr "बीमा लागत"
+
+msgid "Intelligent dispatch workflow for your fleet."
+msgstr "आपके बेड़े के लिए स्मार्ट डिस्पैच कार्यप्रवाह।"
+
+msgid "Language"
+msgstr "भाषा"
+
+msgid "Last inspection"
+msgstr "अंतिम निरीक्षण"
+
+msgid "Latitude"
+msgstr "अक्षांश"
+
+msgid "Live Fleet Monitoring"
+msgstr "बेड़े की लाइव निगरानी"
+
+msgid "Load Details"
+msgstr "लोड विवरण"
+
+msgid "Loaded"
+msgstr "लोडेड"
+
+msgid "Loads"
+msgstr "लोड"
+
+msgid "Loads completed"
+msgstr "पूरे किए गए लोड"
+
+msgid "Location"
+msgstr "स्थान"
+
+msgid "Log in"
+msgstr "लॉग इन करें"
+
+msgid "Log in to G Fleet IQ"
+msgstr "G Fleet IQ में लॉग इन करें"
+
+msgid "Log out"
+msgstr "लॉग आउट करें"
+
+msgid "Longitude"
+msgstr "देशांतर"
+
+msgid "MC"
+msgstr "MC"
+
+msgid "MC number"
+msgstr "MC नंबर"
+
+msgid "MPG"
+msgstr "एमपीजी"
+
+msgid "Maintenance"
+msgstr "रखरखाव"
+
+msgid "Maintenance cost"
+msgstr "रखरखाव लागत"
+
+msgid "Manage Loads"
+msgstr "लोड प्रबंधित करें"
+
+msgid "Manage loads, drivers, trucks, trailers, dispatching and fleet profitability from one intelligent platform."
+msgstr "एक ही स्मार्ट प्लेटफ़ॉर्म से लोड, चालक, ट्रक, ट्रेलर, डिस्पैच और बेड़े की लाभप्रदता प्रबंधित करें।"
+
+msgid "Manage the customers who book your loads."
+msgstr "अपने लोड बुक करने वाले ग्राहकों को प्रबंधित करें।"
+
+msgid "Mark Delivered"
+msgstr "डिलीवर हुआ चिह्नित करें"
+
+msgid "Mark this load as delivered and make its assigned equipment available?"
+msgstr "क्या इस लोड को डिलीवर हुआ चिह्नित करके इसके उपकरण उपलब्ध करें?"
+
+msgid "Miles"
+msgstr "मील"
+
+msgid "Miles today"
+msgstr "आज के मील"
+
+msgid "Monitor your fleet using the interactive map."
+msgstr "इंटरैक्टिव मानचित्र से अपने बेड़े की निगरानी करें।"
+
+msgid "Name"
+msgstr "नाम"
+
+msgid "New to G Fleet IQ?"
+msgstr "G Fleet IQ पर नए हैं?"
+
+msgid "Next"
+msgstr "अगला"
+
+msgid "No Driver"
+msgstr "कोई चालक नहीं"
+
+msgid "No Trailer"
+msgstr "कोई ट्रेलर नहीं"
+
+msgid "No Truck"
+msgstr "कोई ट्रक नहीं"
+
+msgid "No available drivers."
+msgstr "कोई चालक उपलब्ध नहीं है।"
+
+msgid "No available trailers."
+msgstr "कोई ट्रेलर उपलब्ध नहीं है।"
+
+msgid "No available trucks."
+msgstr "कोई ट्रक उपलब्ध नहीं है।"
+
+msgid "No companies found."
+msgstr "कोई कंपनी नहीं मिली।"
+
+msgid "No customers found."
+msgstr "कोई ग्राहक नहीं मिला।"
+
+msgid "No drivers found."
+msgstr "कोई चालक नहीं मिला।"
+
+msgid "No live fuel station data available yet."
+msgstr "अभी ईंधन स्टेशनों का लाइव डेटा उपलब्ध नहीं है।"
+
+msgid "No loads found."
+msgstr "कोई लोड नहीं मिला।"
+
+msgid "No recent loads."
+msgstr "कोई हाल का लोड नहीं है।"
+
+msgid "No trailers found."
+msgstr "कोई ट्रेलर नहीं मिला।"
+
+msgid "No trucks found."
+msgstr "कोई ट्रक नहीं मिला।"
+
+msgid "Open Dispatch Board"
+msgstr "डिस्पैच बोर्ड खोलें"
+
+msgid "Out of Service"
+msgstr "सेवा से बाहर"
+
+msgid "Password"
+msgstr "पासवर्ड"
+
+msgid "Pause"
+msgstr "रोकें"
+
+msgid "Phone"
+msgstr "फ़ोन"
+
+msgid "Pickup"
+msgstr "पिकअप"
+
+msgid "Pickup ETA"
+msgstr "पिकअप का अनुमानित समय"
+
+msgid "Pickup date and time"
+msgstr "पिकअप की तारीख और समय"
+
+msgid "Pickup location"
+msgstr "पिकअप स्थान"
+
+msgid "Play"
+msgstr "चलाएँ"
+
+msgid "Previous"
+msgstr "पिछला"
+
+msgid "Priority"
+msgstr "प्राथमिकता"
+
+msgid "Profit"
+msgstr "लाभ"
+
+msgid "Profit Intelligence"
+msgstr "लाभ विश्लेषण"
+
+msgid "Profit per Mile"
+msgstr "प्रति मील लाभ"
+
+msgid "Profit/Mile"
+msgstr "प्रति मील लाभ"
+
+msgid "Quick Actions"
+msgstr "त्वरित कार्रवाइयाँ"
+
+msgid "Rate"
+msgstr "दर"
+
+msgid "Recent Drivers"
+msgstr "हाल के चालक"
+
+msgid "Recent Loads"
+msgstr "हाल के लोड"
+
+msgid "Recommended Driver"
+msgstr "अनुशंसित चालक"
+
+msgid "Recommended Load"
+msgstr "अनुशंसित लोड"
+
+msgid "Recommended Trailer"
+msgstr "अनुशंसित ट्रेलर"
+
+msgid "Recommended Truck"
+msgstr "अनुशंसित ट्रक"
+
+msgid "Revenue"
+msgstr "राजस्व"
+
+msgid "Save Changes"
+msgstr "परिवर्तन सहेजें"
+
+msgid "Save Company"
+msgstr "कंपनी सहेजें"
+
+msgid "Save Customer"
+msgstr "ग्राहक सहेजें"
+
+msgid "Save Driver"
+msgstr "चालक सहेजें"
+
+msgid "Save Load"
+msgstr "लोड सहेजें"
+
+msgid "Save Trailer"
+msgstr "ट्रेलर सहेजें"
+
+msgid "Save Truck"
+msgstr "ट्रक सहेजें"
+
+msgid "See G Fleet IQ in Action"
+msgstr "G Fleet IQ को काम करते देखें"
+
+msgid "Shift end"
+msgstr "शिफ्ट समाप्त"
+
+msgid "Shift start"
+msgstr "शिफ्ट शुरू"
+
+msgid "Status"
+msgstr "स्थिति"
+
+msgid "There are no loads waiting for AI assignment right now."
+msgstr "अभी कोई लोड एआई असाइनमेंट की प्रतीक्षा में नहीं है।"
+
+msgid "Tolls"
+msgstr "टोल"
+
+msgid "Total Profit"
+msgstr "कुल लाभ"
+
+msgid "Total Revenue"
+msgstr "कुल राजस्व"
+
+msgid "Track revenue, costs and load profitability."
+msgstr "आय, लागत और लोड की लाभप्रदता देखें।"
+
+msgid "Trailer"
+msgstr "ट्रेलर"
+
+msgid "Trailer number"
+msgstr "ट्रेलर नंबर"
+
+msgid "Trailers"
+msgstr "ट्रेलर"
+
+msgid "Truck"
+msgstr "ट्रक"
+
+msgid "Truck Information"
+msgstr "ट्रक की जानकारी"
+
+msgid "Truck Information Center"
+msgstr "ट्रक जानकारी केंद्र"
+
+msgid "Truck Number"
+msgstr "ट्रक नंबर"
+
+msgid "Truck Stops"
+msgstr "ट्रक स्टॉप"
+
+msgid "Truck capacity"
+msgstr "ट्रक की क्षमता"
+
+msgid "Trucks"
+msgstr "ट्रक"
+
+msgid "Trucks in Maintenance"
+msgstr "रखरखाव में ट्रक"
+
+msgid "Unit number"
+msgstr "यूनिट नंबर"
+
+msgid "Update Location"
+msgstr "स्थान अपडेट करें"
+
+msgid "Username"
+msgstr "उपयोगकर्ता नाम"
+
+msgid "Utilization"
+msgstr "उपयोग"
+
+msgid "View Details"
+msgstr "विवरण देखें"
+
+msgid "View Documents"
+msgstr "दस्तावेज़ देखें"
+
+msgid "Weight"
+msgstr "वज़न"
+
+msgid "Why AI Selected This Load"
+msgstr "एआई ने यह लोड क्यों चुना"
+
+msgid "Yes, Delete"
+msgstr "हाँ, हटाएँ"
+
+msgid "Your account is ready. Welcome to G Fleet IQ!"
+msgstr "आपका खाता तैयार है। G Fleet IQ में आपका स्वागत है!"

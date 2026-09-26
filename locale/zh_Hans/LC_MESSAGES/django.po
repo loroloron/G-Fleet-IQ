@@ -1,0 +1,647 @@
+msgid ""
+msgstr "Project-Id-Version: G Fleet IQ\nLanguage: zh-hans\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "AI Decision Score"
+msgstr "AI 决策评分"
+
+msgid "AI Dispatch"
+msgstr "AI 调度"
+
+msgid "AI Dispatch Center"
+msgstr "AI 调度中心"
+
+msgid "AI Dispatch Platform"
+msgstr "AI 调度平台"
+
+msgid "AI Dispatch Recommendation"
+msgstr "AI 调度建议"
+
+msgid "AI Rank"
+msgstr "AI 排名"
+
+msgid "AI Recommendation"
+msgstr "AI 建议"
+
+msgid "AI Score"
+msgstr "AI 评分"
+
+msgid "AI recommends this fuel stop."
+msgstr "AI 推荐此加油站。"
+
+msgid "AI score"
+msgstr "AI 评分"
+
+msgid "AI-Powered Fleet Dispatch & Profit Management"
+msgstr "AI 智能车队调度与利润管理"
+
+msgid "AI-Powered Fleet Management System"
+msgstr "AI 智能车队管理系统"
+
+msgid "Actions"
+msgstr "操作"
+
+msgid "Active"
+msgstr "启用"
+
+msgid "Active Loads"
+msgstr "进行中的货运单"
+
+msgid "Add Driver"
+msgstr "添加司机"
+
+msgid "Add New Company"
+msgstr "添加公司"
+
+msgid "Add New Customer"
+msgstr "添加新客户"
+
+msgid "Add New Load"
+msgstr "添加货运单"
+
+msgid "Add Trailer"
+msgstr "添加拖车"
+
+msgid "Add Truck"
+msgstr "添加卡车"
+
+msgid "All available loads have been dispatched."
+msgstr "所有可用货运单均已调度。"
+
+msgid "Already have an account?"
+msgstr "已有账户？"
+
+msgid "Are you sure you want to delete"
+msgstr "确定要删除"
+
+msgid "Are you sure you want to delete this load for"
+msgstr "确定要删除此客户的货运单"
+
+msgid "Assign Load"
+msgstr "分配货运单"
+
+msgid "Assigned"
+msgstr "已分配"
+
+msgid "Assigned Loads"
+msgstr "已分配货运单"
+
+msgid "Availability"
+msgstr "可用情况"
+
+msgid "Available"
+msgstr "可用"
+
+msgid "Available Drivers"
+msgstr "可用司机"
+
+msgid "Available Trailers"
+msgstr "可用拖车"
+
+msgid "Available Trucks"
+msgstr "可用卡车"
+
+msgid "Average AI Score"
+msgstr "平均 AI 评分"
+
+msgid "Average Profit / Load"
+msgstr "每单平均利润"
+
+msgid "Back to Dashboard"
+msgstr "返回仪表盘"
+
+msgid "Back to Drivers"
+msgstr "返回司机列表"
+
+msgid "Back to Loads"
+msgstr "返回货运单"
+
+msgid "Back to Trucks"
+msgstr "返回卡车列表"
+
+msgid "Best Fuel Stop"
+msgstr "最佳加油站"
+
+msgid "Busy"
+msgstr "忙碌"
+
+msgid "Cancel"
+msgstr "取消"
+
+msgid "Capacity"
+msgstr "载重"
+
+msgid "Choose a username and password to get started."
+msgstr "选择用户名和密码以开始使用。"
+
+msgid "Command Center"
+msgstr "控制中心"
+
+msgid "Companies"
+msgstr "公司"
+
+msgid "Company"
+msgstr "公司"
+
+msgid "Company List"
+msgstr "公司列表"
+
+msgid "Create account"
+msgstr "创建账户"
+
+msgid "Create an account"
+msgstr "创建账户"
+
+msgid "Create your G Fleet IQ account"
+msgstr "创建您的 G Fleet IQ 账户"
+
+msgid "Customer"
+msgstr "客户"
+
+msgid "Customer List"
+msgstr "客户列表"
+
+msgid "Customers"
+msgstr "客户"
+
+msgid "DISPATCH THIS LOAD"
+msgstr "调度此货运单"
+
+msgid "DOT"
+msgstr "DOT"
+
+msgid "DOT number"
+msgstr "DOT 编号"
+
+msgid "Dashboard"
+msgstr "仪表盘"
+
+msgid "Delete"
+msgstr "删除"
+
+msgid "Delete Customer"
+msgstr "删除客户"
+
+msgid "Delete Driver"
+msgstr "删除司机"
+
+msgid "Delete Load"
+msgstr "删除货运单"
+
+msgid "Delete Trailer"
+msgstr "删除拖车"
+
+msgid "Delete Truck"
+msgstr "删除卡车"
+
+msgid "Delete truck"
+msgstr "删除卡车"
+
+msgid "Delivery"
+msgstr "送货"
+
+msgid "Delivery date and time"
+msgstr "送货日期和时间"
+
+msgid "Delivery location"
+msgstr "送货地点"
+
+msgid "Detour"
+msgstr "绕行"
+
+msgid "Diesel"
+msgstr "柴油"
+
+msgid "Dispatch Board"
+msgstr "调度看板"
+
+msgid "Distance"
+msgstr "距离"
+
+msgid "Drive Time"
+msgstr "驾驶时间"
+
+msgid "Driver"
+msgstr "司机"
+
+msgid "Driver pay"
+msgstr "司机工资"
+
+msgid "Driver to Pickup"
+msgstr "司机到提货点"
+
+msgid "Drivers"
+msgstr "司机"
+
+msgid "Drivers Low on Hours"
+msgstr "剩余工时较少的司机"
+
+msgid "Edit"
+msgstr "编辑"
+
+msgid "Edit Company"
+msgstr "编辑公司"
+
+msgid "Edit Customer"
+msgstr "编辑客户"
+
+msgid "Edit Driver"
+msgstr "编辑司机"
+
+msgid "Edit Load"
+msgstr "编辑货运单"
+
+msgid "Edit Trailer"
+msgstr "编辑拖车"
+
+msgid "Edit Truck"
+msgstr "编辑卡车"
+
+msgid "Email"
+msgstr "电子邮件"
+
+msgid "Empty"
+msgstr "空"
+
+msgid "Empty Trailers"
+msgstr "空拖车"
+
+msgid "Enter G Fleet IQ"
+msgstr "进入 G Fleet IQ"
+
+msgid "Enter your account details to continue."
+msgstr "输入账户信息以继续。"
+
+msgid "Equipment"
+msgstr "设备"
+
+msgid "Executive Performance"
+msgstr "经营业绩"
+
+msgid "Expenses & Profit"
+msgstr "费用与利润"
+
+msgid "Explore how G Fleet IQ manages dispatching, loads, fleet operations and profitability."
+msgstr "了解 G Fleet IQ 如何管理调度、货运单、车队运营和利润。"
+
+msgid "Fleet Alerts"
+msgstr "车队提醒"
+
+msgid "Fleet Health"
+msgstr "车队状况"
+
+msgid "Fleet Map"
+msgstr "车队地图"
+
+msgid "Fleet Overview"
+msgstr "车队概览"
+
+msgid "Fleet Visibility"
+msgstr "车队可视化"
+
+msgid "Fuel Needed"
+msgstr "所需燃油"
+
+msgid "Fuel cost"
+msgstr "燃油成本"
+
+msgid "Fuel efficiency"
+msgstr "燃油效率"
+
+msgid "G Fleet IQ"
+msgstr "G Fleet IQ"
+
+msgid "Home terminal"
+msgstr "所属终点站"
+
+msgid "Hours Remaining"
+msgstr "剩余工时"
+
+msgid "Hours remaining"
+msgstr "剩余工时"
+
+msgid "Inactive"
+msgstr "停用"
+
+msgid "Insurance"
+msgstr "保险"
+
+msgid "Insurance cost"
+msgstr "保险成本"
+
+msgid "Intelligent dispatch workflow for your fleet."
+msgstr "为您的车队提供智能调度流程。"
+
+msgid "Language"
+msgstr "语言"
+
+msgid "Last inspection"
+msgstr "上次检查"
+
+msgid "Latitude"
+msgstr "纬度"
+
+msgid "Live Fleet Monitoring"
+msgstr "车队实时监控"
+
+msgid "Load Details"
+msgstr "货运单详情"
+
+msgid "Loaded"
+msgstr "已装货"
+
+msgid "Loads"
+msgstr "货运单"
+
+msgid "Loads completed"
+msgstr "已完成货运单"
+
+msgid "Location"
+msgstr "位置"
+
+msgid "Log in"
+msgstr "登录"
+
+msgid "Log in to G Fleet IQ"
+msgstr "登录 G Fleet IQ"
+
+msgid "Log out"
+msgstr "退出登录"
+
+msgid "Longitude"
+msgstr "经度"
+
+msgid "MC"
+msgstr "MC"
+
+msgid "MC number"
+msgstr "MC 编号"
+
+msgid "MPG"
+msgstr "英里/加仑"
+
+msgid "Maintenance"
+msgstr "维护"
+
+msgid "Maintenance cost"
+msgstr "维护成本"
+
+msgid "Manage Loads"
+msgstr "管理货运单"
+
+msgid "Manage loads, drivers, trucks, trailers, dispatching and fleet profitability from one intelligent platform."
+msgstr "在一个智能平台上管理货运单、司机、卡车、拖车、调度和车队利润。"
+
+msgid "Manage the customers who book your loads."
+msgstr "管理预订货运单的客户。"
+
+msgid "Mark Delivered"
+msgstr "标记为已送达"
+
+msgid "Mark this load as delivered and make its assigned equipment available?"
+msgstr "将此货运单标记为已送达并释放已分配的设备？"
+
+msgid "Miles"
+msgstr "英里"
+
+msgid "Miles today"
+msgstr "今日里程"
+
+msgid "Monitor your fleet using the interactive map."
+msgstr "使用交互式地图监控您的车队。"
+
+msgid "Name"
+msgstr "名称"
+
+msgid "New to G Fleet IQ?"
+msgstr "刚开始使用 G Fleet IQ？"
+
+msgid "Next"
+msgstr "下一张"
+
+msgid "No Driver"
+msgstr "无司机"
+
+msgid "No Trailer"
+msgstr "无拖车"
+
+msgid "No Truck"
+msgstr "无卡车"
+
+msgid "No available drivers."
+msgstr "没有可用司机。"
+
+msgid "No available trailers."
+msgstr "没有可用拖车。"
+
+msgid "No available trucks."
+msgstr "没有可用卡车。"
+
+msgid "No companies found."
+msgstr "未找到公司。"
+
+msgid "No customers found."
+msgstr "未找到客户。"
+
+msgid "No drivers found."
+msgstr "未找到司机。"
+
+msgid "No live fuel station data available yet."
+msgstr "暂时没有实时加油站数据。"
+
+msgid "No loads found."
+msgstr "未找到货运单。"
+
+msgid "No recent loads."
+msgstr "没有最近的货运单。"
+
+msgid "No trailers found."
+msgstr "未找到拖车。"
+
+msgid "No trucks found."
+msgstr "未找到卡车。"
+
+msgid "Open Dispatch Board"
+msgstr "打开调度看板"
+
+msgid "Out of Service"
+msgstr "停用"
+
+msgid "Password"
+msgstr "密码"
+
+msgid "Pause"
+msgstr "暂停"
+
+msgid "Phone"
+msgstr "电话"
+
+msgid "Pickup"
+msgstr "提货"
+
+msgid "Pickup ETA"
+msgstr "预计提货时间"
+
+msgid "Pickup date and time"
+msgstr "提货日期和时间"
+
+msgid "Pickup location"
+msgstr "提货地点"
+
+msgid "Play"
+msgstr "播放"
+
+msgid "Previous"
+msgstr "上一张"
+
+msgid "Priority"
+msgstr "优先级"
+
+msgid "Profit"
+msgstr "利润"
+
+msgid "Profit Intelligence"
+msgstr "利润分析"
+
+msgid "Profit per Mile"
+msgstr "每英里利润"
+
+msgid "Profit/Mile"
+msgstr "每英里利润"
+
+msgid "Quick Actions"
+msgstr "快捷操作"
+
+msgid "Rate"
+msgstr "运费"
+
+msgid "Recent Drivers"
+msgstr "最近添加的司机"
+
+msgid "Recent Loads"
+msgstr "最近货运单"
+
+msgid "Recommended Driver"
+msgstr "推荐司机"
+
+msgid "Recommended Load"
+msgstr "推荐货运单"
+
+msgid "Recommended Trailer"
+msgstr "推荐拖车"
+
+msgid "Recommended Truck"
+msgstr "推荐卡车"
+
+msgid "Revenue"
+msgstr "收入"
+
+msgid "Save Changes"
+msgstr "保存更改"
+
+msgid "Save Company"
+msgstr "保存公司"
+
+msgid "Save Customer"
+msgstr "保存客户"
+
+msgid "Save Driver"
+msgstr "保存司机"
+
+msgid "Save Load"
+msgstr "保存货运单"
+
+msgid "Save Trailer"
+msgstr "保存拖车"
+
+msgid "Save Truck"
+msgstr "保存卡车"
+
+msgid "See G Fleet IQ in Action"
+msgstr "查看 G Fleet IQ 的实际演示"
+
+msgid "Shift end"
+msgstr "班次结束"
+
+msgid "Shift start"
+msgstr "班次开始"
+
+msgid "Status"
+msgstr "状态"
+
+msgid "There are no loads waiting for AI assignment right now."
+msgstr "目前没有等待 AI 分配的货运单。"
+
+msgid "Tolls"
+msgstr "过路费"
+
+msgid "Total Profit"
+msgstr "总利润"
+
+msgid "Total Revenue"
+msgstr "总收入"
+
+msgid "Track revenue, costs and load profitability."
+msgstr "跟踪收入、成本和货运单利润。"
+
+msgid "Trailer"
+msgstr "拖车"
+
+msgid "Trailer number"
+msgstr "拖车编号"
+
+msgid "Trailers"
+msgstr "拖车"
+
+msgid "Truck"
+msgstr "卡车"
+
+msgid "Truck Information"
+msgstr "卡车信息"
+
+msgid "Truck Information Center"
+msgstr "卡车信息中心"
+
+msgid "Truck Number"
+msgstr "卡车编号"
+
+msgid "Truck Stops"
+msgstr "卡车服务站"
+
+msgid "Truck capacity"
+msgstr "卡车载重"
+
+msgid "Trucks"
+msgstr "卡车"
+
+msgid "Trucks in Maintenance"
+msgstr "维修中的卡车"
+
+msgid "Unit number"
+msgstr "车辆编号"
+
+msgid "Update Location"
+msgstr "更新位置"
+
+msgid "Username"
+msgstr "用户名"
+
+msgid "Utilization"
+msgstr "利用率"
+
+msgid "View Details"
+msgstr "查看详情"
+
+msgid "View Documents"
+msgstr "查看文件"
+
+msgid "Weight"
+msgstr "重量"
+
+msgid "Why AI Selected This Load"
+msgstr "AI 选择此货运单的原因"
+
+msgid "Yes, Delete"
+msgstr "是，删除"
+
+msgid "Your account is ready. Welcome to G Fleet IQ!"
+msgstr "您的账户已准备就绪。欢迎使用 G Fleet IQ！"

@@ -1,4 +1,4 @@
-{% load static %}
+{% load static i18n %}
 
 <!DOCTYPE html>
 <html>
@@ -11,6 +11,12 @@
             font-family: Arial, sans-serif;
             background: #f5f7fa;
             color: #17202a;
+        }
+
+        .language-picker {
+            position: absolute;
+            top: 16px;
+            right: 18px;
         }
 
         .hero {
@@ -98,18 +104,30 @@
 
     <div class="hero">
 
-        <h1>🚛 G Fleet IQ</h1>
+        {% get_current_language as CURRENT_LANGUAGE %}
+        {% get_available_languages as AVAILABLE_LANGUAGES %}
+        {% get_language_info_list for AVAILABLE_LANGUAGES as language_list %}
+        <form action="{% url 'set_language' %}" method="post" class="language-picker">
+            {% csrf_token %}
+            <input name="next" type="hidden" value="{{ request.get_full_path }}">
+            <label for="landing-language-select" class="visually-hidden">{% translate "Language" %}</label>
+            <select id="landing-language-select" name="language" class="form-select form-select-sm" onchange="this.form.submit()">
+                {% for language in language_list %}
+                    <option value="{{ language.code }}"{% if language.code == CURRENT_LANGUAGE %} selected{% endif %}>{{ language.name_local }}</option>
+                {% endfor %}
+            </select>
+        </form>
 
-        <h2>AI-Powered Fleet Dispatch & Profit Management</h2>
+        <h1>🚛 {% translate "G Fleet IQ" %}</h1>
+
+        <h2>{% translate "AI-Powered Fleet Dispatch & Profit Management" %}</h2>
 
         <p>
-            Manage loads, drivers, trucks, trailers,
-            dispatching and fleet profitability from one
-            intelligent platform.
+            {% translate "Manage loads, drivers, trucks, trailers, dispatching and fleet profitability from one intelligent platform." %}
         </p>
 
         <a href="{% url 'home' %}" class="button">
-            🚀 Enter G Fleet IQ
+            🚀 {% translate "Enter G Fleet IQ" %}
         </a>
 
     </div>
@@ -117,11 +135,10 @@
 
     <div class="video-section">
 
-    <h2>🎬 See G Fleet IQ in Action</h2>
+    <h2>🎬 {% translate "See G Fleet IQ in Action" %}</h2>
 
     <p>
-        Explore how G Fleet IQ manages dispatching,
-        loads, fleet operations and profitability.
+        {% translate "Explore how G Fleet IQ manages dispatching, loads, fleet operations and profitability." %}
     </p>
 
     <div style="max-width:1100px; margin:30px auto; text-align:center;">
@@ -135,15 +152,15 @@
         <div style="margin-top:20px;">
 
             <button onclick="previousSlide()">
-                ◀ Previous
+                ◀ {% translate "Previous" %}
             </button>
 
             <button onclick="nextSlide()">
-                Next ▶
+                {% translate "Next" %} ▶
             </button>
 
-            <button onclick="toggleSlide()">
-                ⏸ Pause
+            <button onclick="toggleSlide(this)">
+                ⏸ {% translate "Pause" %}
             </button>
 
         </div>
@@ -186,9 +203,9 @@ function previousSlide() {
     showSlide();
 }
 
-function toggleSlide() {
+function toggleSlide(button) {
     playing = !playing;
-    event.target.innerText = playing ? "⏸ Pause" : "▶ Play";
+    button.innerText = playing ? "⏸ {% translate 'Pause' %}" : "▶ {% translate 'Play' %}";
 }
 
 setInterval(function() {
@@ -203,23 +220,23 @@ setInterval(function() {
     <div class="features">
 
         <div class="feature">
-            <h3>🤖 AI Dispatch</h3>
+            <h3>🤖 {% translate "AI Dispatch" %}</h3>
             <p>
-                Intelligent dispatch workflow for your fleet.
+                {% translate "Intelligent dispatch workflow for your fleet." %}
             </p>
         </div>
 
         <div class="feature">
-            <h3>💰 Profit Intelligence</h3>
+            <h3>💰 {% translate "Profit Intelligence" %}</h3>
             <p>
-                Track revenue, costs and load profitability.
+                {% translate "Track revenue, costs and load profitability." %}
             </p>
         </div>
 
         <div class="feature">
-            <h3>🗺️ Fleet Visibility</h3>
+            <h3>🗺️ {% translate "Fleet Visibility" %}</h3>
             <p>
-                Monitor your fleet using the interactive map.
+                {% translate "Monitor your fleet using the interactive map." %}
             </p>
         </div>
 

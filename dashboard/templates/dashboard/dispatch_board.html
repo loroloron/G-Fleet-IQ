@@ -1,8 +1,9 @@
 {% extends "dashboard/base.html" %}
+{% load i18n %}
 
 {% block content %}
 
-<h1 class="mb-4">🚚 Dispatch Board</h1>
+<h1 class="mb-4">🚚 {% translate "Dispatch Board" %}</h1>
 {% if messages %}
     {% for message in messages %}
         <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
@@ -42,37 +43,37 @@
             <div class="row">
 
                 <div class="col-md-3">
-                    <strong>🤖 AI Score</strong><br>
+                    <strong>🤖 {% translate "AI Score" %}</strong><br>
                     {{ best_plan.ai_score }}/100
                 </div>
 
                 <div class="col-md-3">
-                    <strong>👤 Driver</strong><br>
+                    <strong>👤 {% translate "Driver" %}</strong><br>
 
                     {% if best_plan.driver %}
                         {{ best_plan.driver.name }}
                     {% else %}
-                        No Driver
+                        {% translate "No Driver" %}
                     {% endif %}
                 </div>
 
                 <div class="col-md-3">
-                    <strong>🚛 Truck</strong><br>
+                    <strong>🚛 {% translate "Truck" %}</strong><br>
 
                     {% if best_plan.truck %}
                         {{ best_plan.truck.unit_number }}
                     {% else %}
-                        No Truck
+                        {% translate "No Truck" %}
                     {% endif %}
                 </div>
 
                 <div class="col-md-3">
-                    <strong>🚚 Trailer</strong><br>
+                    <strong>🚚 {% translate "Trailer" %}</strong><br>
 
                     {% if best_plan.trailer %}
                         {{ best_plan.trailer.trailer_number }}
                     {% else %}
-                        No Trailer
+                        {% translate "No Trailer" %}
                     {% endif %}
                 </div>
 
@@ -86,22 +87,22 @@
 <div class="row">
 
     <div class="col-md-3">
-        <strong>💰 Revenue</strong><br>
+        <strong>💰 {% translate "Revenue" %}</strong><br>
         ${{ best_plan.profit.revenue|floatformat:2 }}
     </div>
 
     <div class="col-md-3">
-        <strong>💵 Profit</strong><br>
+        <strong>💵 {% translate "Profit" %}</strong><br>
         ${{ best_plan.profit.profit|floatformat:2 }}
     </div>
 
     <div class="col-md-3">
-        <strong>📈 Profit/Mile</strong><br>
+        <strong>📈 {% translate "Profit/Mile" %}</strong><br>
         ${{ best_plan.profit.profit_per_mile|floatformat:2 }}
     </div>
 
     <div class="col-md-3">
-        <strong>🛣️ Miles</strong><br>
+        <strong>🛣️ {% translate "Miles" %}</strong><br>
         {{ best_plan.route.miles|floatformat:1 }}
     </div>
 
@@ -110,17 +111,17 @@
 <div class="row mt-3">
 
     <div class="col-md-4">
-        <strong>⛽ MPG</strong><br>
+        <strong>⛽ {% translate "MPG" %}</strong><br>
         {{ best_plan.profit.mpg|floatformat:1 }}
     </div>
 
     <div class="col-md-4">
-        <strong>⛽ Fuel Needed</strong><br>
+        <strong>⛽ {% translate "Fuel Needed" %}</strong><br>
         {{ best_plan.profit.gallons|floatformat:2 }} gal
     </div>
 
     <div class="col-md-4">
-        <strong>💵 Fuel Cost</strong><br>
+        <strong>💵 {% translate "Fuel cost" %}</strong><br>
         ${{ best_plan.profit.fuel_cost|floatformat:2 }}
     </div>
 
@@ -138,7 +139,7 @@
 <div class="row">
 
    <div class="col-md-6">
-    <strong>📍 Driver → Pickup</strong><br>
+    <strong>📍 {% translate "Driver to Pickup" %}</strong><br>
 
     {% if best_plan.driver_distance is not None %}
         {{ best_plan.driver_distance }} miles
@@ -150,7 +151,7 @@
 
 
     <div class="col-md-6">
-        <strong>⏱️ Pickup ETA</strong><br>
+        <strong>⏱️ {% translate "Pickup ETA" %}</strong><br>
 
         {% if best_plan.driver_drive_hours is not None %}
             {{ best_plan.driver_drive_hours }} hours
@@ -163,7 +164,7 @@
 
 <hr>
 
-<h5>🧠 Why AI Selected This Load</h5>
+<h5>🧠 {% translate "Why AI Selected This Load" %}</h5>
 
 {% for reason in best_plan.ai_reasons %}
     <div>{{ reason }}</div>
@@ -184,7 +185,7 @@
 
         {% if best_fuel_stop %}
 
-            <h4>🏆 Best Fuel Stop</h4>
+            <h4>🏆 {% translate "Best Fuel Stop" %}</h4>
 
             <p class="mb-2">
                 <strong>{{ best_fuel_stop.name }}</strong>
@@ -197,12 +198,12 @@
             <div class="row">
 
                 <div class="col-md-3">
-                    <strong>💵 Diesel</strong><br>
+                    <strong>💵 {% translate "Diesel" %}</strong><br>
                     ${{ best_fuel_stop.price_per_gallon|floatformat:2 }}/gal
                 </div>
 
                 <div class="col-md-3">
-                    <strong>📍 Detour</strong><br>
+                    <strong>📍 {% translate "Detour" %}</strong><br>
                     {{ best_fuel_stop.detour_miles|floatformat:1 }} miles
                 </div>
 
@@ -212,7 +213,7 @@
                 </div>
 
                 <div class="col-md-3">
-                    <strong>🤖 AI Rank</strong><br>
+                    <strong>🤖 {% translate "AI Rank" %}</strong><br>
                     #{{ best_fuel_stop.rank }}
                 </div>
 
@@ -221,7 +222,7 @@
             <hr>
 
             <div class="alert alert-success mb-0">
-                ✅ <strong>AI recommends this fuel stop.</strong><br>
+                ✅ <strong>{% translate "AI recommends this fuel stop." %}</strong><br>
                 Lowest effective fuel cost based on price and detour.
             </div>
             <hr>
@@ -237,7 +238,7 @@
         <button type="submit"
                 class="btn btn-success btn-lg">
 
-            🚀 DISPATCH THIS LOAD
+            🚀 {% translate "DISPATCH THIS LOAD" %}
 
         </button>
 
@@ -248,7 +249,7 @@
         {% else %}
 
             <div class="alert alert-info mb-0">
-                ⛽ No live fuel station data available yet.
+                ⛽ {% translate "No live fuel station data available yet." %}
             </div>
 
         {% endif %}
@@ -260,8 +261,8 @@
 {% else %}
 
     <div class="alert alert-info">
-        📦 <strong>All available loads have been dispatched.</strong><br>
-        There are no loads waiting for AI assignment right now.
+        📦 <strong>{% translate "All available loads have been dispatched." %}</strong><br>
+        {% translate "There are no loads waiting for AI assignment right now." %}
     </div>
 
 {% endif %}

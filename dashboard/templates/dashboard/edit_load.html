@@ -1,10 +1,11 @@
 {% extends "dashboard/base.html" %}
+{% load i18n %}
 
 {% block content %}
 
 <div class="container mt-4">
 
-    <h1>✏️ Edit Load</h1>
+    <h1>✏️ {% translate "Edit Load" %}</h1>
 
     <div class="card mt-4">
         <div class="card-header">
@@ -19,12 +20,12 @@
                 {{ form.as_p }}
 
                 <button type="submit" class="btn btn-success">
-                    💾 Save Changes
+                    💾 {% translate "Save Changes" %}
                 </button>
 
                 <a href="{% url 'load_detail' load.id %}"
                    class="btn btn-secondary">
-                    Cancel
+                    {% translate "Cancel" %}
                 </a>
 
             </form>

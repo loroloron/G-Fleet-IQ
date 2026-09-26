@@ -1,10 +1,11 @@
 {% extends "dashboard/base.html" %}
+{% load i18n %}
 
 {% block content %}
 
 <div class="container-fluid">
 
-<h1 class="mb-4">🤖 AI Dispatch Center</h1>
+<h1 class="mb-4">🤖 {% translate "AI Dispatch Center" %}</h1>
 
 <div class="row">
 
@@ -14,14 +15,14 @@
         <div class="card shadow mb-4">
 
             <div class="card-header bg-success text-white">
-                <h4 class="mb-0">🤖 AI Recommendation</h4>
+                <h4 class="mb-0">🤖 {% translate "AI Recommendation" %}</h4>
             </div>
 
             <div class="card-body">
 
                 {% if best_driver and best_truck and best_trailer and best_load %}
 
-                    <h5>👤 Recommended Driver</h5>
+                    <h5>👤 {% translate "Recommended Driver" %}</h5>
 
                     <p>
                         <strong>{{ best_driver.name }}</strong><br>
@@ -31,7 +32,7 @@
 
                     <hr>
 
-                    <h5>🚛 Recommended Truck</h5>
+                    <h5>🚛 {% translate "Recommended Truck" %}</h5>
 
                     <p>
                         <strong>{{ best_truck.unit_number }}</strong><br>
@@ -40,7 +41,7 @@
 
                     <hr>
 
-                    <h5>🚚 Recommended Trailer</h5>
+                    <h5>🚚 {% translate "Recommended Trailer" %}</h5>
 
                     <p>
                         <strong>{{ best_trailer.trailer_number }}</strong><br>
@@ -49,7 +50,7 @@
 
                     <hr>
 
-                    <h5>📦 Recommended Load</h5>
+                    <h5>📦 {% translate "Recommended Load" %}</h5>
 
                     <p>
                         <strong>{{ best_load.customer }}</strong><br>
@@ -86,47 +87,47 @@
                 <table class="table table-bordered">
 
                     <tr>
-                        <th>Driver</th>
+                        <th>{% translate "Driver" %}</th>
                         <td>{{ best_driver.name }}</td>
                     </tr>
 
                     <tr>
-                        <th>Truck</th>
+                        <th>{% translate "Truck" %}</th>
                         <td>{{ best_truck.unit_number }}</td>
                     </tr>
 
                     <tr>
-                        <th>Trailer</th>
+                        <th>{% translate "Trailer" %}</th>
                         <td>{{ best_trailer.trailer_number }}</td>
                     </tr>
 
                     <tr>
-                        <th>Customer</th>
+                        <th>{% translate "Customer" %}</th>
                         <td>{{ best_load.customer }}</td>
                     </tr>
 
                     <tr>
-                        <th>Pickup</th>
+                        <th>{% translate "Pickup" %}</th>
                         <td>{{ best_load.pickup }}</td>
                     </tr>
 
                     <tr>
-                        <th>Delivery</th>
+                        <th>{% translate "Delivery" %}</th>
                         <td>{{ best_load.delivery }}</td>
                     </tr>
 
                     <tr>
-                        <th>Rate</th>
+                        <th>{% translate "Rate" %}</th>
                         <td>${{ best_load.rate }}</td>
                     </tr>
 
                     <tr>
-                        <th>Miles</th>
+                        <th>{% translate "Miles" %}</th>
                         <td>{{ best_load.miles }}</td>
                     </tr>
 
                     <tr>
-                        <th>Profit</th>
+                        <th>{% translate "Profit" %}</th>
                         <td>${{ best_load.profit }}</td>
                     </tr>
 
@@ -134,21 +135,21 @@
 
                 <hr>
                 <tr>
-    <th>Drive Time</th>
+    <th>{% translate "Drive Time" %}</th>
     <td>{{ route.drive_hours }} Hours</td>
 </tr>
 
 <tr>
-    <th>Fuel Cost</th>
+    <th>{% translate "Fuel cost" %}</th>
     <td>${{ route.fuel_cost }}</td>
 </tr>
 
 <tr>
-    <th>Truck Stops</th>
+    <th>{% translate "Truck Stops" %}</th>
     <td>{{ route.truck_stops }}</td>
 </tr>
 
-                <h5>🧠 AI Decision Score</h5>
+                <h5>🧠 {% translate "AI Decision Score" %}</h5>
 
                 <div class="progress mb-3">
 
@@ -212,7 +213,7 @@
 
                 {% empty %}
 
-                    <p>No available drivers.</p>
+                    <p>{% translate "No available drivers." %}</p>
 
                 {% endfor %}
 
@@ -246,7 +247,7 @@
 
                 {% empty %}
 
-                    <p>No available trucks.</p>
+                    <p>{% translate "No available trucks." %}</p>
 
                 {% endfor %}
 
@@ -274,7 +275,7 @@
 
                 {% empty %}
 
-                    <p>No available trailers.</p>
+                    <p>{% translate "No available trailers." %}</p>
 
                 {% endfor %}
 
