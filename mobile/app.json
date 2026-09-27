@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "G Fleet IQ",
+    "slug": "g-fleet-iq-mobile",
+    "scheme": "gfleetiq",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "bundleIdentifier": "com.loroloron.gfleetiq",
+      "supportsTablet": true,
+      "config": {
+        "usesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.loroloron.gfleetiq"
+    },
+    "plugins": ["expo-secure-store"]
+  }
+}

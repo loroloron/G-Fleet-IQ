@@ -1,0 +1,26 @@
+{
+  "id": "/",
+  "name": "G Fleet IQ",
+  "short_name": "G Fleet IQ",
+  "description": "Fleet dispatch and operations management.",
+  "start_url": "/dashboard/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#f4f7fb",
+  "theme_color": "#1167f5",
+  "icons": [
+    {
+      "src": "/static/pwa/g-fleet-iq.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {"name": "Dashboard", "url": "/dashboard/"},
+    {"name": "Loads", "url": "/loads/"},
+    {"name": "Dispatch Board", "url": "/dispatch/"}
+  ]
+}

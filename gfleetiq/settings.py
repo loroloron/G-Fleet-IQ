@@ -59,9 +59,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework.authtoken',
     'fleet',
     'dashboard',
 ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_THROTTLE_RATES": {
+        "mobile_login": "5/minute",
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

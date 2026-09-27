@@ -4,11 +4,14 @@ from django.views.i18n import set_language
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib.auth import views as auth_views
 from dashboard import views as dashboard_views
+from dashboard.pwa import service_worker
 
 urlpatterns = [
 
     path("admin/", admin.site.urls),
     path("i18n/setlang/", set_language, name="set_language"),
+    path("service-worker.js", service_worker, name="service_worker"),
+    path("api/mobile/", include("dashboard.mobile_urls")),
     path("login/", auth_views.LoginView.as_view(template_name="registration/login.html"), name="login"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("sign-up/", dashboard_views.sign_up, name="sign_up"),
