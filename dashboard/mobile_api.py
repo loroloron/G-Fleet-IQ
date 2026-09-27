@@ -11,7 +11,9 @@ from rest_framework.views import APIView
 
 from fleet.models import (
     AccountMembership,
+    Company,
     CompanyMembership,
+    Customer,
     Driver,
     Load,
     Trailer,
@@ -198,6 +200,98 @@ class MobileLoadsView(APIView):
         return Response({
             "can_dispatch": access["can_dispatch"],
             "loads": [_load_data(load) for load in loads.order_by("-id")[:100]],
+        })
+
+
+class MobileWorkspaceView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        access = _access_for(request.user)
+        if access is None:
+            return Response(
+                {"detail": "This user is not assigned to a G Fleet IQ account yet."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        customers = _scoped(Customer.objects.select_related("company"), access).order_by("name")
+        drivers = _scoped(Driver.objects.select_related("company", "truck"), access).order_by("name")
+        trucks = _scoped(Truck.objects.select_related("company"), access).order_by("unit_number")
+        trailers = _scoped(Trailer.objects.select_related("company"), access).order_by("trailer_number")
+
+        companies = Company.objects.filter(account=access["account"]).order_by("name")
+        if not access["account_admin"]:
+            companies = companies.filter(pk__in=access["visible_company_ids"])
+
+        if access["account_admin"]:
+            team_company_ids = set(companies.values_list("pk", flat=True))
+        else:
+            team_company_ids = {
+                item.company_id
+                for item in access["client_memberships"]
+                if item.role == CompanyMembership.ROLE_CLIENT_ADMIN
+            }
+        client_teams = []
+        for company in companies.filter(pk__in=team_company_ids):
+            members = CompanyMembership.objects.filter(
+                company=company, active=True
+            ).select_related("user").order_by("user__username")
+            client_teams.append({
+                "company": company.name,
+                "members": [
+                    {"username": member.user.get_username(), "role": member.get_role_display()}
+                    for member in members
+                ],
+            })
+
+        membership = access["account_membership"]
+        can_manage_account = bool(
+            membership and membership.role == AccountMembership.ROLE_OWNER
+        )
+        account_team = []
+        if can_manage_account:
+            account_team = [
+                {"username": member.user.get_username(), "role": member.get_role_display()}
+                for member in AccountMembership.objects.filter(
+                    account=access["account"], active=True
+                ).select_related("user").order_by("user__username")
+            ]
+
+        return Response({
+            "can_manage_companies": access["account_admin"],
+            "can_manage_account": can_manage_account,
+            "can_view_client_teams": bool(team_company_ids),
+            "companies": [
+                {"name": company.name, "dot_number": company.dot_number, "mc_number": company.mc_number,
+                 "phone": company.phone, "email": company.email, "active": company.active}
+                for company in companies
+            ],
+            "customers": [
+                {"name": customer.name, "location": customer.location,
+                 "company": customer.company.name if customer.company_id else ""}
+                for customer in customers
+            ],
+            "drivers": [
+                {"name": driver.name, "status": driver.status, "location": driver.location,
+                 "available": driver.available, "truck": driver.truck.unit_number if driver.truck_id else "",
+                 "company": driver.company.name if driver.company_id else ""}
+                for driver in drivers
+            ],
+            "trucks": [
+                {"unit_number": truck.unit_number, "status": "Available" if truck.active else "Assigned",
+                 "capacity": truck.capacity, "latitude": truck.latitude, "longitude": truck.longitude,
+                 "company": truck.company.name if truck.company_id else ""}
+                for truck in trucks
+            ],
+            "trailers": [
+                {"trailer_number": trailer.trailer_number, "status": trailer.status,
+                 "available": trailer.available, "location": trailer.location,
+                 "company": trailer.company.name if trailer.company_id else ""}
+                for trailer in trailers
+            ],
+            "account_team": account_team,
+            "client_teams": client_teams,
         })
 
 

@@ -6,6 +6,7 @@ from .mobile_api import (
     MobileLoadsView,
     MobileLoginView,
     MobileLogoutView,
+    MobileWorkspaceView,
 )
 
 urlpatterns = [
@@ -13,5 +14,6 @@ urlpatterns = [
     path("logout/", MobileLogoutView.as_view(), name="mobile_logout"),
     path("dashboard/", MobileDashboardView.as_view(), name="mobile_dashboard"),
     path("loads/", MobileLoadsView.as_view(), name="mobile_loads"),
+    path("workspace/", MobileWorkspaceView.as_view(), name="mobile_workspace"),
     path("loads/<int:load_id>/<str:action>/", MobileLoadActionView.as_view(), name="mobile_load_action"),
 ]
