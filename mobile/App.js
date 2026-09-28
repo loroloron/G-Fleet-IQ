@@ -147,6 +147,23 @@ const SECTION_TITLES = {
   client_teams: "Client Teams",
 };
 
+const CREATE_FIELDS = {
+  companies: [
+    ["name", "Company name"], ["dot_number", "DOT number"], ["mc_number", "MC number"],
+    ["phone", "Phone"], ["email", "Email"],
+  ],
+  customers: [["name", "Customer name"], ["location", "Location"], ["company", "Client company"]],
+  drivers: [["name", "Driver name"], ["location", "Location"], ["phone", "Phone"], ["company", "Client company"]],
+  trucks: [["unit_number", "Truck unit number"], ["capacity", "Capacity (lb)"], ["company", "Client company"]],
+  trailers: [["trailer_number", "Trailer number"], ["location", "Location"], ["company", "Client company"]],
+  loads: [["customer", "Existing customer name"], ["pickup", "Pickup location"], ["delivery", "Delivery location"]],
+};
+const CREATE_TITLES = {
+  companies: "company", customers: "customer", drivers: "driver",
+  trucks: "truck", trailers: "trailer", loads: "load",
+};
+const createTypeForScreen = (screen) => ["dispatch_board", "ai_dispatch"].includes(screen) ? "loads" : screen;
+
 const BASE_MENU_ITEMS = [
   { key: "dashboard", icon: "🏠" },
   { key: "companies", icon: "🏢", accountAdminOnly: true },
@@ -206,6 +223,9 @@ export default function App() {
   const [loadsData, setLoadsData] = useState(null);
   const [workspaceData, setWorkspaceData] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createValues, setCreateValues] = useState({});
+  const [savingRecord, setSavingRecord] = useState(false);
   const [loginBusy, setLoginBusy] = useState(false);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -330,6 +350,39 @@ export default function App() {
       setError(exception.message);
     } finally {
       setBusyLoadId(null);
+    }
+  }
+
+  function beginCreate() {
+    const values = {};
+    (CREATE_FIELDS[createTypeForScreen(screen)] || []).forEach(([key]) => { values[key] = ""; });
+    setCreateValues(values);
+    setError("");
+    setCreateOpen(true);
+  }
+
+  async function saveRecord() {
+    setSavingRecord(true);
+    setError("");
+    try {
+      await request("/records/", token, {
+        method: "POST",
+        body: JSON.stringify({ ...createValues, type: createTypeForScreen(screen) }),
+      });
+      setCreateOpen(false);
+      setCreateValues({});
+      if (["loads", "dispatch_board", "ai_dispatch"].includes(screen)) {
+        setLoadsData(null);
+        await loadLoads(token);
+      } else {
+        setWorkspaceData(null);
+        await loadWorkspace(token);
+      }
+      setDashboard(null);
+    } catch (exception) {
+      setError(exception.message);
+    } finally {
+      setSavingRecord(false);
     }
   }
 
@@ -463,6 +516,9 @@ export default function App() {
           <>
             <Text style={styles.eyebrow}>FLEET OPERATIONS</Text>
             <Text style={styles.pageTitle}>{SECTION_TITLES[screen]}</Text>
+            {loadsData?.can_dispatch ? (
+              <PrimaryButton title="＋ Add load" onPress={beginCreate} />
+            ) : null}
             <Text style={styles.mutedText}>
               {screen === "ai_dispatch"
                 ? "Review loads and assign the best available driver and equipment."
@@ -477,6 +533,11 @@ export default function App() {
           <>
             <Text style={styles.eyebrow}>FLEET OPERATIONS</Text>
             <Text style={styles.pageTitle}>{SECTION_TITLES[screen]}</Text>
+            {CREATE_FIELDS[createTypeForScreen(screen)] && (
+              createTypeForScreen(screen) === "companies" ? accountAdmin : dashboard?.can_dispatch
+            ) ? (
+              <PrimaryButton title={`＋ Add ${CREATE_TITLES[createTypeForScreen(screen)]}`} onPress={beginCreate} />
+            ) : null}
             {screen === "fleet_map" ? (
               <Text style={styles.mutedText}>Truck locations from your fleet records.</Text>
             ) : null}
@@ -523,6 +584,39 @@ export default function App() {
                   <Text style={styles.menuItemArrow}>›</Text>
                 </Pressable>
               ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal visible={createOpen} transparent animationType="slide" onRequestClose={() => setCreateOpen(false)}>
+        <View style={styles.createModal}>
+          <Pressable accessibilityLabel="Close form" onPress={() => setCreateOpen(false)} style={styles.menuBackdrop} />
+          <View style={styles.createPanel}>
+            <View style={styles.menuHeading}>
+              <Text style={styles.menuTitle}>Add {CREATE_TITLES[createTypeForScreen(screen)]}</Text>
+              <Pressable accessibilityRole="button" accessibilityLabel="Close form" onPress={() => setCreateOpen(false)} style={styles.menuClose}>
+                <Text style={styles.menuCloseText}>×</Text>
+              </Pressable>
+            </View>
+            <ScrollView keyboardShouldPersistTaps="handled">
+              {(CREATE_FIELDS[createTypeForScreen(screen)] || []).map(([key, label]) => (
+                <View key={key}>
+                  <Text style={styles.inputLabel}>{label}</Text>
+                  <TextInput
+                    value={createValues[key] || ""}
+                    onChangeText={(value) => setCreateValues((current) => ({ ...current, [key]: value }))}
+                    placeholder={label}
+                    placeholderTextColor={colors.muted}
+                    autoCapitalize={key === "email" ? "none" : "words"}
+                    keyboardType={key === "capacity" ? "numeric" : key === "email" ? "email-address" : "default"}
+                    style={styles.input}
+                  />
+                </View>
+              ))}
+              {createTypeForScreen(screen) === "loads" ? <Text style={styles.mutedText}>The customer must already exist in your account. Add it from Customers first if needed.</Text> : null}
+              <PrimaryButton title={savingRecord ? "Saving…" : "Save"} onPress={saveRecord} disabled={savingRecord} />
+              <PrimaryButton title="Cancel" tone="green" onPress={() => setCreateOpen(false)} disabled={savingRecord} />
             </ScrollView>
           </View>
         </View>
@@ -612,6 +706,8 @@ const styles = StyleSheet.create({
   tabLabel: { color: colors.muted, fontSize: 11, fontWeight: "700", marginTop: 1 },
   tabActive: { color: colors.blue },
   menuModal: { flex: 1, justifyContent: "flex-end" },
+  createModal: { flex: 1, justifyContent: "center", padding: 18 },
+  createPanel: { maxHeight: "88%", backgroundColor: colors.white, borderRadius: 20, paddingHorizontal: 18, paddingTop: 12, paddingBottom: 22 },
   menuBackdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(8, 20, 38, 0.5)" },
   menuPanel: { maxHeight: "82%", backgroundColor: colors.white, borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingHorizontal: 18, paddingTop: 12, paddingBottom: 24 },
   menuHeading: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: colors.border },

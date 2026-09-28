@@ -262,8 +262,9 @@ class MobileWorkspaceView(APIView):
             "can_manage_companies": access["account_admin"],
             "can_manage_account": can_manage_account,
             "can_view_client_teams": bool(team_company_ids),
+            "can_add_records": access["can_dispatch"],
             "companies": [
-                {"name": company.name, "dot_number": company.dot_number, "mc_number": company.mc_number,
+                {"id": company.pk, "name": company.name, "dot_number": company.dot_number, "mc_number": company.mc_number,
                  "phone": company.phone, "email": company.email, "active": company.active}
                 for company in companies
             ],
@@ -293,6 +294,116 @@ class MobileWorkspaceView(APIView):
             "account_team": account_team,
             "client_teams": client_teams,
         })
+
+
+class MobileCreateRecordView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        access = _access_for(request.user)
+        if access is None:
+            return Response({"detail": "This user is not assigned to a G Fleet IQ account yet."}, status=403)
+
+        data = request.data
+        kind = str(data.get("type", "")).strip().lower()
+        account = access["account"]
+        company_ids = access["writable_company_ids"]
+        company_name = str(data.get("company", "")).strip()
+
+        if kind == "companies":
+            if not access["account_admin"]:
+                return Response({"detail": "Only account administrators can add client companies."}, status=403)
+            name = str(data.get("name", "")).strip()
+            if not name:
+                return Response({"detail": "Enter a company name."}, status=400)
+            company = Company.objects.create(
+                account=account,
+                name=name,
+                dot_number=str(data.get("dot_number", "")).strip(),
+                mc_number=str(data.get("mc_number", "")).strip(),
+                phone=str(data.get("phone", "")).strip(),
+                email=str(data.get("email", "")).strip(),
+            )
+            return Response({"id": company.pk, "name": company.name}, status=201)
+
+        if kind not in {"customers", "drivers", "trucks", "trailers", "loads"}:
+            return Response({"detail": "Unknown category."}, status=400)
+        if not access["can_dispatch"]:
+            return Response({"detail": "Your access is read-only."}, status=403)
+
+        company = None
+        if company_name:
+            companies = Company.objects.filter(account=account, name__iexact=company_name)
+            if not access["account_admin"]:
+                companies = companies.filter(pk__in=company_ids)
+            company = companies.first()
+            if company is None:
+                return Response({"detail": "That company was not found in your account."}, status=400)
+        elif not access["account_admin"] and len(company_ids) == 1:
+            company = Company.objects.filter(pk=next(iter(company_ids)), account=account).first()
+
+        if kind == "customers":
+            name = str(data.get("name", "")).strip()
+            location = str(data.get("location", "")).strip()
+            if not name or not location:
+                return Response({"detail": "Enter the customer name and location."}, status=400)
+            if not access["account_admin"] and company is None:
+                return Response({"detail": "Enter the client company name for this customer."}, status=400)
+            record = Customer.objects.create(account=account, name=name, location=location, company=company)
+            return Response({"id": record.pk, "name": record.name}, status=201)
+
+        if kind == "drivers":
+            name = str(data.get("name", "")).strip()
+            if not name:
+                return Response({"detail": "Enter the driver name."}, status=400)
+            if not access["account_admin"] and company is None:
+                return Response({"detail": "Enter the client company name for this driver."}, status=400)
+            record = Driver.objects.create(
+                account=account, name=name, location=str(data.get("location", "")).strip(),
+                phone=str(data.get("phone", "")).strip(), company=company,
+            )
+            return Response({"id": record.pk, "name": record.name}, status=201)
+
+        if kind == "trucks":
+            unit_number = str(data.get("unit_number", "")).strip()
+            if not unit_number:
+                return Response({"detail": "Enter the truck unit number."}, status=400)
+            if not access["account_admin"] and company is None:
+                return Response({"detail": "Enter the client company name for this truck."}, status=400)
+            try:
+                capacity = int(data.get("capacity") or 40000)
+            except (TypeError, ValueError):
+                return Response({"detail": "Capacity must be a number."}, status=400)
+            record = Truck.objects.create(account=account, unit_number=unit_number, capacity=capacity, company=company)
+            return Response({"id": record.pk, "name": record.unit_number}, status=201)
+
+        if kind == "trailers":
+            number = str(data.get("trailer_number", "")).strip()
+            if not number:
+                return Response({"detail": "Enter the trailer number."}, status=400)
+            if not access["account_admin"] and company is None:
+                return Response({"detail": "Enter the client company name for this trailer."}, status=400)
+            record = Trailer.objects.create(
+                account=account, trailer_number=number, location=str(data.get("location", "")).strip(), company=company,
+            )
+            return Response({"id": record.pk, "name": record.trailer_number}, status=201)
+
+        customer_name = str(data.get("customer", "")).strip()
+        pickup = str(data.get("pickup", "")).strip()
+        delivery = str(data.get("delivery", "")).strip()
+        if not customer_name or not pickup or not delivery:
+            return Response({"detail": "Enter an existing customer, pickup, and delivery location."}, status=400)
+        customers = _scoped(Customer.objects.select_related("company"), access, writable=True)
+        customer = customers.filter(name__iexact=customer_name).first()
+        if customer is None:
+            return Response({"detail": "Customer not found. Add the customer first, then create the load."}, status=400)
+        record = Load.objects.create(
+            account=account, customer=customer, company=customer.company,
+            pickup=pickup, delivery=delivery,
+            priority=str(data.get("priority", "Normal")) if str(data.get("priority", "Normal")) in {"Low", "Normal", "High", "Critical"} else "Normal",
+        )
+        return Response({"id": record.pk, "name": f"{record.customer.name} · {record.pickup}"}, status=201)
 
 
 class MobileLoadActionView(APIView):
