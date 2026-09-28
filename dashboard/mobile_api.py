@@ -1,5 +1,7 @@
 from django.db import transaction
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
@@ -114,11 +116,19 @@ class MobileLoginView(APIView):
             )
 
         user = serializer.validated_data["user"]
-        token, _ = Token.objects.get_or_create(user=user)
+        driver = Driver.objects.filter(user=user).select_related("account", "company", "truck").first()
         access = _access_for(user)
+        if driver is None and access is None:
+            return Response(
+                {"detail": "This user is not assigned to a G Fleet IQ account or driver yet."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        token, _ = Token.objects.get_or_create(user=user)
         return Response({
             "token": token.key,
             "user": {"username": user.get_username()},
+            "user_type": "driver" if driver else "office",
+            "driver_name": driver.name if driver else "",
             "account": {
                 "name": access["account"].name if access else "",
                 "role": _account_role(access) if access else "",
@@ -201,6 +211,83 @@ class MobileLoadsView(APIView):
             "can_dispatch": access["can_dispatch"],
             "loads": [_load_data(load) for load in loads.order_by("-id")[:100]],
         })
+
+
+def _driver_load_data(load):
+    data = _load_data(load)
+    data.update({
+        "pickup_arrived_at": load.pickup_arrived_at.isoformat() if load.pickup_arrived_at else None,
+        "pickup_departed_at": load.pickup_departed_at.isoformat() if load.pickup_departed_at else None,
+        "delivery_arrived_at": load.delivery_arrived_at.isoformat() if load.delivery_arrived_at else None,
+        "delivery_departed_at": load.delivery_departed_at.isoformat() if load.delivery_departed_at else None,
+    })
+    return data
+
+
+class MobileDriverLoadsView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        driver = Driver.objects.filter(user=request.user).select_related("account", "company", "truck").first()
+        if driver is None:
+            return Response({"detail": "This sign-in is not linked to a driver."}, status=403)
+        loads = Load.objects.filter(
+            account=driver.account,
+            driver=driver,
+            status="Assigned",
+        ).select_related("customer", "driver", "truck", "trailer", "company").order_by("pickup_datetime", "id")
+        return Response({
+            "driver": driver.name,
+            "truck": driver.truck.unit_number if driver.truck_id else "",
+            "loads": [_driver_load_data(load) for load in loads[:25]],
+        })
+
+
+class MobileDriverStopActionView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, load_id, action):
+        driver = Driver.objects.filter(user=request.user).first()
+        if driver is None:
+            return Response({"detail": "This sign-in is not linked to a driver."}, status=403)
+        allowed_actions = {
+            "pickup-arrived": ("pickup_arrived_at", None),
+            "pickup-departed": ("pickup_departed_at", "pickup_arrived_at"),
+            "delivery-arrived": ("delivery_arrived_at", "pickup_departed_at"),
+            "delivery-departed": ("delivery_departed_at", "delivery_arrived_at"),
+        }
+        if action not in allowed_actions:
+            return Response({"detail": "Unknown driver action."}, status=404)
+
+        with transaction.atomic():
+            load = get_object_or_404(
+                Load.objects.select_for_update().select_related("customer", "driver", "truck", "trailer", "company"),
+                pk=load_id,
+                account=driver.account,
+                driver=driver,
+                status="Assigned",
+            )
+            field, prerequisite = allowed_actions[action]
+            if prerequisite and not getattr(load, prerequisite):
+                return Response({"detail": "Complete the previous stop update first."}, status=409)
+            if getattr(load, field):
+                return Response({"detail": "This stop update was already recorded."}, status=409)
+
+            setattr(load, field, timezone.now())
+            updated_fields = [field]
+            if action == "delivery-departed":
+                load.status = "Delivered"
+                updated_fields.append("status")
+                Driver.objects.filter(pk=driver.pk).update(available=True, status="Available")
+                if load.truck_id:
+                    Truck.objects.filter(pk=load.truck_id, account=driver.account).update(active=True)
+                if load.trailer_id:
+                    Trailer.objects.filter(pk=load.trailer_id, account=driver.account).update(available=True)
+            load.save(update_fields=updated_fields)
+            load.refresh_from_db()
+            return Response({"load": _driver_load_data(load)})
 
 
 class MobileWorkspaceView(APIView):
@@ -355,13 +442,20 @@ class MobileCreateRecordView(APIView):
 
         if kind == "drivers":
             name = str(data.get("name", "")).strip()
+            username = str(data.get("login_username", "")).strip()
+            password = str(data.get("login_password", ""))
             if not name:
                 return Response({"detail": "Enter the driver name."}, status=400)
+            if not username or len(password) < 8:
+                return Response({"detail": "Enter a driver app username and a password of at least 8 characters."}, status=400)
+            if get_user_model().objects.filter(username=username).exists():
+                return Response({"detail": "That driver app username is already in use."}, status=400)
             if not access["account_admin"] and company is None:
                 return Response({"detail": "Enter the client company name for this driver."}, status=400)
+            driver_user = get_user_model().objects.create_user(username=username, password=password)
             record = Driver.objects.create(
                 account=account, name=name, location=str(data.get("location", "")).strip(),
-                phone=str(data.get("phone", "")).strip(), company=company,
+                phone=str(data.get("phone", "")).strip(), company=company, user=driver_user,
             )
             return Response({"id": record.pk, "name": record.name}, status=201)
 

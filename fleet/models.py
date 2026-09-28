@@ -119,6 +119,13 @@ class Trailer(models.Model):
 
 class Driver(models.Model):
     account = models.ForeignKey(FleetAccount, on_delete=models.CASCADE, related_name="drivers")
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="driver_profile",
+    )
     STATUS_CHOICES=[("Available","Available"),("Driving","Driving"),("Off Duty","Off Duty"),("On Break","On Break")]
     name=models.CharField(max_length=100)
     location=models.CharField(max_length=200,blank=True,default="")
@@ -194,6 +201,10 @@ class Load(models.Model):
     profit=models.DecimalField(max_digits=10,decimal_places=2,default=0)
     profit_per_mile=models.DecimalField(max_digits=10,decimal_places=2,default=0)
     status=models.CharField(max_length=50,default="Available")
+    pickup_arrived_at=models.DateTimeField(null=True,blank=True)
+    pickup_departed_at=models.DateTimeField(null=True,blank=True)
+    delivery_arrived_at=models.DateTimeField(null=True,blank=True)
+    delivery_departed_at=models.DateTimeField(null=True,blank=True)
     driver=models.ForeignKey(Driver,on_delete=models.SET_NULL,null=True,blank=True)
     truck=models.ForeignKey(Truck,on_delete=models.SET_NULL,null=True,blank=True)
     trailer=models.ForeignKey(Trailer,on_delete=models.SET_NULL,null=True,blank=True)

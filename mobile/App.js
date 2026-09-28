@@ -88,6 +88,10 @@ function LoadCard({ load, canDispatch, onAction, busy }) {
         {load.company ? <Text style={styles.companyName}>{load.company}</Text> : null}
         <Text style={styles.expandHint}>{expanded ? "Hide details  ▲" : "Tap to view load details  ▼"}</Text>
       </Pressable>
+      <View style={styles.assignmentLine}>
+        <Text style={styles.assignmentText}>Driver: {load.driver || "Not assigned"}</Text>
+        {load.priority ? <Text style={styles.priorityText}>{load.priority}</Text> : null}
+      </View>
       {expanded ? (
         <>
           <View style={styles.routeBlock}>
@@ -96,26 +100,22 @@ function LoadCard({ load, canDispatch, onAction, busy }) {
             <Text style={[styles.routeLabel, styles.deliveryLabel]}>DELIVERY</Text>
             <Text style={styles.routeValue}>{load.delivery}</Text>
           </View>
-          <View style={styles.assignmentLine}>
-            <Text style={styles.assignmentText}>Driver: {load.driver || "Unassigned"}</Text>
-            {load.priority ? <Text style={styles.priorityText}>{load.priority}</Text> : null}
-          </View>
-          {canAssign ? (
-            <PrimaryButton
-              title={busy ? "Assigning…" : "Assign best available equipment"}
-              disabled={busy}
-              onPress={() => onAction(load, "assign")}
-            />
-          ) : null}
-          {canDeliver ? (
-            <PrimaryButton
-              title={busy ? "Updating…" : "Mark delivered"}
-              tone="green"
-              disabled={busy}
-              onPress={() => onAction(load, "deliver")}
-            />
-          ) : null}
         </>
+      ) : null}
+      {canAssign ? (
+        <PrimaryButton
+          title={busy ? "Dispatching…" : "Dispatch to best available driver"}
+          disabled={busy}
+          onPress={() => onAction(load, "assign")}
+        />
+      ) : null}
+      {canDeliver ? (
+        <PrimaryButton
+          title={busy ? "Updating…" : "Mark delivered"}
+          tone="green"
+          disabled={busy}
+          onPress={() => onAction(load, "deliver")}
+        />
       ) : null}
     </View>
   );
@@ -153,7 +153,7 @@ const CREATE_FIELDS = {
     ["phone", "Phone"], ["email", "Email"],
   ],
   customers: [["name", "Customer name"], ["location", "Location"], ["company", "Client company"]],
-  drivers: [["name", "Driver name"], ["location", "Location"], ["phone", "Phone"], ["company", "Client company"]],
+  drivers: [["name", "Driver name"], ["location", "Location"], ["phone", "Phone"], ["company", "Client company"], ["login_username", "Driver app username"], ["login_password", "Driver app password"]],
   trucks: [["unit_number", "Truck unit number"], ["capacity", "Capacity (lb)"], ["company", "Client company"]],
   trailers: [["trailer_number", "Trailer number"], ["location", "Location"], ["company", "Client company"]],
   loads: [["customer", "Existing customer name"], ["pickup", "Pickup location"], ["delivery", "Delivery location"]],
@@ -213,9 +213,126 @@ function getSectionCards(screen, workspace) {
   return [];
 }
 
+function nextDriverStep(load) {
+  if (!load.pickup_arrived_at) return ["pickup-arrived", "Arrived at pickup"];
+  if (!load.pickup_departed_at) return ["pickup-departed", "Departed pickup"];
+  if (!load.delivery_arrived_at) return ["delivery-arrived", "Arrived at delivery"];
+  if (!load.delivery_departed_at) return ["delivery-departed", "Departed delivery · Complete load"];
+  return null;
+}
+
+function stopTime(value) {
+  return value ? new Date(value).toLocaleString() : "";
+}
+
+function DriverLoadCard({ load, index, onAction, busy }) {
+  const nextStep = nextDriverStep(load);
+  return (
+    <View style={styles.driverLoadCard}>
+      <Text style={styles.eyebrow}>{index === 0 ? "CURRENT LOAD" : "NEXT LOAD"}</Text>
+      <Text style={styles.driverLoadTitle}>{load.customer}</Text>
+      {load.company ? <Text style={styles.mutedText}>{load.company}</Text> : null}
+      <View style={styles.routeBlock}>
+        <Text style={styles.routeLabel}>PICKUP</Text>
+        <Text style={styles.routeValue}>{load.pickup}</Text>
+        <Text style={[styles.routeLabel, styles.deliveryLabel]}>DELIVERY</Text>
+        <Text style={styles.routeValue}>{load.delivery}</Text>
+      </View>
+      <Text style={styles.driverEquipment}>Truck {load.truck || "not assigned"} · Trailer {load.trailer || "not assigned"}</Text>
+      {nextStep ? (
+        <PrimaryButton
+          title={busy ? "Saving update…" : nextStep[1]}
+          disabled={busy}
+          onPress={() => onAction(load, nextStep[0])}
+        />
+      ) : null}
+      <View style={styles.driverTimeline}>
+        <Text style={styles.driverTimelineText}>{load.pickup_arrived_at ? `✓ At pickup · ${stopTime(load.pickup_arrived_at)}` : "○ Pickup arrival"}</Text>
+        <Text style={styles.driverTimelineText}>{load.pickup_departed_at ? `✓ Left pickup · ${stopTime(load.pickup_departed_at)}` : "○ Pickup departure"}</Text>
+        <Text style={styles.driverTimelineText}>{load.delivery_arrived_at ? `✓ At delivery · ${stopTime(load.delivery_arrived_at)}` : "○ Delivery arrival"}</Text>
+        <Text style={styles.driverTimelineText}>{load.delivery_departed_at ? `✓ Left delivery · ${stopTime(load.delivery_departed_at)}` : "○ Delivery departure"}</Text>
+      </View>
+    </View>
+  );
+}
+
+function DriverHome({ token, onSignOut }) {
+  const [driverData, setDriverData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [busyLoadId, setBusyLoadId] = useState(null);
+  const [error, setError] = useState("");
+
+  const refreshLoads = useCallback(async (quiet = false) => {
+    if (!quiet) setLoading(true);
+    setError("");
+    try {
+      setDriverData(await request("/driver/loads/", token));
+    } catch (exception) {
+      setError(exception.message);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [token]);
+
+  useEffect(() => { refreshLoads(); }, [refreshLoads]);
+
+  async function recordStop(load, action) {
+    setBusyLoadId(load.id);
+    setError("");
+    try {
+      await request(`/driver/loads/${load.id}/${action}/`, token, { method: "POST" });
+      await refreshLoads(true);
+    } catch (exception) {
+      setError(exception.message);
+    } finally {
+      setBusyLoadId(null);
+    }
+  }
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="light-content" backgroundColor={colors.navy} />
+      <View style={styles.topBar}>
+        <View style={styles.topBarBrand}>
+          <Text style={styles.topBarEmoji}>🚚</Text>
+          <View>
+            <Text style={styles.topBarTitle}>G Fleet IQ Driver</Text>
+            <Text style={styles.topBarAccount} numberOfLines={1}>{driverData?.driver || "Driver"}</Text>
+          </View>
+        </View>
+        <Pressable accessibilityRole="button" onPress={onSignOut} style={styles.signOutButton}>
+          <Text style={styles.signOutText}>Log out</Text>
+        </Pressable>
+      </View>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); refreshLoads(true); }} tintColor={colors.blue} />}
+      >
+        <Text style={styles.eyebrow}>DRIVER WORKSPACE</Text>
+        <Text style={styles.pageTitle}>Your loads</Text>
+        {driverData?.truck ? <Text style={styles.mutedText}>Truck {driverData.truck}</Text> : null}
+        {error ? <Text accessibilityRole="alert" style={styles.errorBox}>{error}</Text> : null}
+        {loading && !driverData ? <ActivityIndicator color={colors.blue} style={styles.loader} /> : null}
+        {(driverData?.loads || []).length ? driverData.loads.map((load, index) => (
+          <DriverLoadCard
+            key={load.id}
+            load={load}
+            index={index}
+            onAction={recordStop}
+            busy={busyLoadId === load.id}
+          />
+        )) : (!loading ? <Text style={styles.emptyCard}>No loads assigned yet. Your next load will appear here after dispatch assigns it.</Text> : null)}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
 export default function App() {
   const passwordInput = useRef(null);
   const [token, setToken] = useState(null);
+  const [userType, setUserType] = useState(null);
   const [screen, setScreen] = useState("dashboard");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -234,7 +351,9 @@ export default function App() {
 
   const resetLogin = useCallback(async () => {
     await SecureStore.deleteItemAsync("gfleetiq_token").catch(() => {});
+    await SecureStore.deleteItemAsync("gfleetiq_user_type").catch(() => {});
     setToken(null);
+    setUserType(null);
     setDashboard(null);
     setLoadsData(null);
     setWorkspaceData(null);
@@ -292,21 +411,25 @@ export default function App() {
 
   useEffect(() => {
     let active = true;
-    SecureStore.getItemAsync("gfleetiq_token")
-      .then((savedToken) => {
+    Promise.all([
+      SecureStore.getItemAsync("gfleetiq_token"),
+      SecureStore.getItemAsync("gfleetiq_user_type"),
+    ])
+      .then(([savedToken, savedUserType]) => {
         if (!active || !savedToken) return;
         setToken(savedToken);
+        setUserType(savedUserType || "office");
       })
       .catch(() => setError("Could not open the saved sign-in. Please sign in again."));
     return () => { active = false; };
   }, [loadDashboard]);
 
   useEffect(() => {
-    if (!token) return;
+    if (!token || userType === "driver") return;
     if (["loads", "dispatch_board", "ai_dispatch"].includes(screen) && !loadsData) loadLoads(token);
     if (screen === "dashboard" && !dashboard) loadDashboard(token);
     if (!["dashboard", "loads", "dispatch_board", "ai_dispatch"].includes(screen) && !workspaceData) loadWorkspace(token);
-  }, [token, screen, loadsData, dashboard, workspaceData, loadDashboard, loadLoads, loadWorkspace]);
+  }, [token, userType, screen, loadsData, dashboard, workspaceData, loadDashboard, loadLoads, loadWorkspace]);
 
   async function signIn() {
     if (!username.trim() || !password) {
@@ -321,7 +444,9 @@ export default function App() {
         body: JSON.stringify({ username: username.trim(), password }),
       });
       await SecureStore.setItemAsync("gfleetiq_token", result.token);
+      await SecureStore.setItemAsync("gfleetiq_user_type", result.user_type || "office");
       setToken(result.token);
+      setUserType(result.user_type || "office");
       setPassword("");
       setScreen("dashboard");
     } catch (exception) {
@@ -337,6 +462,10 @@ export default function App() {
     await resetLogin();
     setError("");
     setScreen("dashboard");
+  }
+
+  if (token && userType === "driver") {
+    return <DriverHome token={token} onSignOut={signOut} />;
   }
 
   async function doLoadAction(load, action) {
@@ -408,13 +537,13 @@ export default function App() {
           <View style={styles.brandMark}><Text style={styles.brandEmoji}>🚚</Text></View>
           <View>
             <Text style={styles.brandTitle}>G Fleet IQ</Text>
-            <Text style={styles.brandSubtitle}>Fleet dispatch, wherever you are</Text>
+          <Text style={styles.brandSubtitle}>Driver loads and stop updates</Text>
           </View>
         </View>
         <View style={styles.loginContent}>
-          <Text style={styles.eyebrow}>DISPATCHER & OWNER APP</Text>
+          <Text style={styles.eyebrow}>DRIVER APP</Text>
           <Text style={styles.loginTitle}>Welcome back</Text>
-          <Text style={styles.mutedText}>Sign in with your G Fleet IQ account.</Text>
+          <Text style={styles.mutedText}>Sign in with the driver username and password provided by your dispatcher.</Text>
           {error ? <Text accessibilityRole="alert" style={styles.errorBox}>{error}</Text> : null}
           <Text style={styles.inputLabel}>Username</Text>
           <TextInput
@@ -608,7 +737,9 @@ export default function App() {
                     onChangeText={(value) => setCreateValues((current) => ({ ...current, [key]: value }))}
                     placeholder={label}
                     placeholderTextColor={colors.muted}
-                    autoCapitalize={key === "email" ? "none" : "words"}
+                    autoCapitalize={["email", "login_username"].includes(key) ? "none" : "words"}
+                    autoCorrect={key !== "login_username"}
+                    secureTextEntry={key === "login_password"}
                     keyboardType={key === "capacity" ? "numeric" : key === "email" ? "email-address" : "default"}
                     style={styles.input}
                   />
@@ -682,6 +813,11 @@ const styles = StyleSheet.create({
   infoCard: { backgroundColor: colors.white, borderColor: colors.border, borderWidth: 1, borderRadius: 14, padding: 15, marginBottom: 12 },
   infoTitle: { color: colors.ink, fontSize: 16, fontWeight: "800", marginBottom: 6 },
   infoLine: { color: colors.muted, fontSize: 13, lineHeight: 19, marginTop: 2 },
+  driverLoadCard: { backgroundColor: colors.white, borderColor: colors.border, borderWidth: 1, borderRadius: 14, padding: 16, marginTop: 14, marginBottom: 4 },
+  driverLoadTitle: { color: colors.ink, fontSize: 20, fontWeight: "800", marginBottom: 4 },
+  driverEquipment: { color: colors.muted, fontSize: 12, marginTop: 12 },
+  driverTimeline: { borderTopWidth: 1, borderTopColor: colors.border, marginTop: 15, paddingTop: 11, gap: 5 },
+  driverTimelineText: { color: colors.muted, fontSize: 12, lineHeight: 17 },
   loadCardHeader: { minHeight: 48, justifyContent: "center" },
   cardPressed: { opacity: 0.72 },
   expandHint: { color: colors.blue, fontSize: 12, fontWeight: "700", marginTop: 9 },

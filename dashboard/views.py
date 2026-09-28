@@ -272,6 +272,37 @@ def home(request):
 # DRIVERS
 # ==========================================================
 
+def _save_driver_login(form, driver):
+    username = form.cleaned_data.get("login_username", "").strip()
+    password = form.cleaned_data.get("login_password", "")
+    if not username and not password:
+        if driver.user_id:
+            return True
+        form.add_error("login_username", "A username and password are required for driver app access.")
+        return False
+
+    User = get_user_model()
+    users = User.objects.filter(username=username)
+    if driver.user_id:
+        users = users.exclude(pk=driver.user_id)
+    if users.exists():
+        form.add_error("login_username", "That username is already in use.")
+        return False
+
+    if driver.user_id:
+        user = driver.user
+        user.username = username
+        if password:
+            user.set_password(password)
+        user.save()
+    else:
+        if not username or not password:
+            form.add_error("login_password", "A username and password are required for driver app access.")
+            return False
+        user = User.objects.create_user(username=username, password=password)
+    driver.user = user
+    return True
+
 def drivers(request):
     return render(
         request,
@@ -282,9 +313,14 @@ def drivers(request):
 
 def add_driver(request):
     form = DriverForm(request.POST or None, account=request.account, client_company_ids=_form_company_ids(request))
+    form.fields["login_username"].required = True
+    form.fields["login_password"].required = True
 
     if request.method == "POST" and form.is_valid():
         driver = form.save(commit=False)
+
+        if not _save_driver_login(form, driver):
+            return render(request, "dashboard/add_driver.html", {"form": form})
 
         location_result = geocode_address(driver.location)
         if location_result:
@@ -314,6 +350,9 @@ def edit_driver(request, driver_id):
 
     if request.method == "POST" and form.is_valid():
         driver = form.save(commit=False)
+
+        if not _save_driver_login(form, driver):
+            return render(request, "dashboard/edit_driver.html", {"driver": driver, "form": form})
 
         location_result = geocode_address(driver.location)
         if location_result:

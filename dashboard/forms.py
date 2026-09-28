@@ -121,11 +121,24 @@ class LoadForm(forms.ModelForm):
 # ==========================================================
 
 class DriverForm(forms.ModelForm):
+    login_username = forms.CharField(
+        required=False,
+        max_length=150,
+        label=_("Driver app username"),
+        help_text=_("Give the driver this username to sign in to the mobile app."),
+    )
+    login_password = forms.CharField(
+        required=False,
+        min_length=8,
+        label=_("Driver app password"),
+        widget=forms.PasswordInput,
+        help_text=_("Enter a new password here to create or reset mobile app access."),
+    )
 
     class Meta:
         model = Driver
 
-        exclude = ("account",)
+        exclude = ("account", "user")
         labels = {
             "name": _("Name"), "location": _("Location"),
             "latitude": _("Latitude"), "longitude": _("Longitude"),
@@ -142,6 +155,8 @@ class DriverForm(forms.ModelForm):
 
     def __init__(self, *args, account=None, client_company_ids=None, **kwargs):
         super().__init__(*args, **kwargs)
+        if self.instance.pk and self.instance.user_id:
+            self.fields["login_username"].initial = self.instance.user.get_username()
         if account is not None:
             companies = Company.objects.filter(account=account)
             trucks = Truck.objects.filter(account=account)
@@ -154,6 +169,14 @@ class DriverForm(forms.ModelForm):
         self.fields["status"].choices = [
             (value, _(label)) for value, label in self.fields["status"].choices
         ]
+
+    def clean(self):
+        cleaned = super().clean()
+        username = cleaned.get("login_username", "").strip()
+        password = cleaned.get("login_password", "")
+        if bool(username) != bool(password) and not (self.instance.pk and self.instance.user_id and username):
+            self.add_error("login_password", _("Enter both a username and password to set up driver app access."))
+        return cleaned
 
 
 # ==========================================================
