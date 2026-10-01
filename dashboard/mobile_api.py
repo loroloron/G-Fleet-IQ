@@ -263,7 +263,7 @@ class MobileDriverStopActionView(APIView):
 
         with transaction.atomic():
             load = get_object_or_404(
-                Load.objects.select_for_update().select_related("customer", "driver", "truck", "trailer", "company"),
+                            Load.objects.select_for_update(),
                 pk=load_id,
                 account=driver.account,
                 driver=driver,
