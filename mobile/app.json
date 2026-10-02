@@ -4,7 +4,7 @@
     "slug": "g-fleet-iq-mobile",
     "scheme": "gfleetiq",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "userInterfaceStyle": "light",
     "ios": {
       "bundleIdentifier": "com.loroloron.gfleetiq",
@@ -16,6 +16,14 @@
     "android": {
       "package": "com.loroloron.gfleetiq"
     },
-    "plugins": ["expo-secure-store"]
+    "plugins": [
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "G Fleet IQ uses tablet location to detect when driving starts while the driver app is open."
+        }
+      ]
+    ]
   }
 }

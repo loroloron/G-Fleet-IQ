@@ -1,0 +1,76 @@
+{% extends "dashboard/base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="mb-1">🕒 {% translate "Driver Daily Logs" %}</h1>
+        <p class="text-muted mb-0">{% translate "Daily activity recorded by drivers in the G Fleet IQ app." %}</p>
+    </div>
+    <form method="get" class="d-flex align-items-end gap-2">
+        <div>
+            <label for="log-date" class="form-label">{% translate "Day" %}</label>
+            <input id="log-date" class="form-control" type="date" name="date" value="{{ selected_day }}">
+        </div>
+        <button class="btn btn-primary" type="submit">{% translate "View day" %}</button>
+    </form>
+</div>
+
+<div class="alert alert-info">
+    {% translate "Worked time is driving plus on-duty, not-driving time. Drivers can change their status manually; tablet movement can switch the status to Driving. This is an operational activity log, not a certified electronic logging device record." %}
+</div>
+
+{% for item in daily_drivers %}
+<section class="card shadow-sm mb-4">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <h2 class="h5 mb-0">{{ item.driver.name }}</h2>
+        <span class="text-muted">{% translate "Worked" %}: <strong>{{ item.worked }}</strong></span>
+    </div>
+    <div class="card-body">
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3"><div class="border rounded p-3 h-100"><div class="text-muted small">{% translate "Driving" %}</div><strong>{{ item.driving }}</strong></div></div>
+            <div class="col-6 col-lg-3"><div class="border rounded p-3 h-100"><div class="text-muted small">{% translate "On duty, not driving" %}</div><strong>{{ item.on_duty }}</strong></div></div>
+            <div class="col-6 col-lg-3"><div class="border rounded p-3 h-100"><div class="text-muted small">{% translate "Off duty" %}</div><strong>{{ item.off_duty }}</strong></div></div>
+            <div class="col-6 col-lg-3"><div class="border rounded p-3 h-100"><div class="text-muted small">{% translate "Truck" %}</div><strong>{{ item.driver.truck|default:"—" }}</strong></div></div>
+        </div>
+
+        <h3 class="h6">{% translate "Timeline" %}</h3>
+        {% if item.entries %}
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+                <thead><tr><th>{% translate "Status" %}</th><th>{% translate "Started" %}</th><th>{% translate "Ended" %}</th><th>{% translate "Duration" %}</th></tr></thead>
+                <tbody>
+                {% for entry in item.entries %}
+                    <tr>
+                        <td>{{ entry.status }}{% if entry.automatic %} <span class="badge text-bg-info">{% translate "Auto" %}</span>{% endif %}{% if entry.active %} <span class="badge text-bg-success">{% translate "Current" %}</span>{% endif %}</td>
+                        <td>{{ entry.start|date:"g:i A" }}</td>
+                        <td>{% if entry.active %}{% translate "In progress" %}{% elif entry.end %}{{ entry.end|date:"g:i A" }}{% else %}—{% endif %}</td>
+                        <td>{{ entry.duration }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <p class="text-muted mb-0">{% translate "No duty-status entries for this day." %}</p>
+        {% endif %}
+    </div>
+</section>
+{% empty %}
+<div class="alert alert-secondary">{% translate "No drivers are available for this account." %}</div>
+{% endfor %}
+
+<section class="card shadow-sm mb-4">
+    <div class="card-header"><h2 class="h5 mb-0">{% translate "Pickup & Delivery Updates" %}</h2></div>
+    <div class="card-body">
+        {% if stop_events %}
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+                <thead><tr><th>{% translate "Time" %}</th><th>{% translate "Driver" %}</th><th>{% translate "Update" %}</th><th>{% translate "Customer" %}</th><th>{% translate "Location" %}</th></tr></thead>
+                <tbody>{% for event in stop_events %}<tr><td>{{ event.occurred_at|date:"g:i A" }}</td><td>{{ event.driver }}</td><td>{{ event.label }}</td><td>{{ event.customer }}</td><td>{{ event.location }}</td></tr>{% endfor %}</tbody>
+            </table>
+        </div>
+        {% else %}<p class="text-muted mb-0">{% translate "No pickup or delivery updates for this day." %}</p>{% endif %}
+    </div>
+</section>
+{% endblock %}

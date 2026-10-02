@@ -5,6 +5,7 @@ urlpatterns = [
     path("", views.landing, name="landing"),
    
     path("dashboard/", views.home, name="home"),
+    path("driver-logs/", views.driver_logs, name="driver_logs"),
     path("drivers/", views. drivers, name="drivers"),
     path("drivers/<int:driver_id>/edit/", views.edit_driver, name="edit_driver"),
     path("customers/", views.customers, name="customers"),

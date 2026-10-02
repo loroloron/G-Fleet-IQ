@@ -4,6 +4,8 @@ from .mobile_api import (
     MobileDashboardView,
     MobileCreateRecordView,
     MobileDriverLoadsView,
+    MobileDriverDutyLogView,
+    MobileDriverLocationView,
     MobileDriverStopActionView,
     MobileLoadActionView,
     MobileLoadsView,
@@ -20,6 +22,9 @@ urlpatterns = [
     path("workspace/", MobileWorkspaceView.as_view(), name="mobile_workspace"),
     path("records/", MobileCreateRecordView.as_view(), name="mobile_create_record"),
     path("driver/loads/", MobileDriverLoadsView.as_view(), name="mobile_driver_loads"),
+    path("driver/duty-log/", MobileDriverDutyLogView.as_view(), name="mobile_driver_duty_log"),
+    path("driver/duty-status/", MobileDriverDutyLogView.as_view(), name="mobile_driver_duty_status"),
+    path("driver/location/", MobileDriverLocationView.as_view(), name="mobile_driver_location"),
     path("driver/loads/<int:load_id>/<str:action>/", MobileDriverStopActionView.as_view(), name="mobile_driver_stop_action"),
     path("loads/<int:load_id>/<str:action>/", MobileLoadActionView.as_view(), name="mobile_load_action"),
 ]

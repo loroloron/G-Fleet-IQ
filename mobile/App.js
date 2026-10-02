@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { useRef } from "react";
 import * as SecureStore from "expo-secure-store";
+import * as Location from "expo-location";
 
 const SERVER_ORIGIN = (process.env.EXPO_PUBLIC_API_URL || "https://g-fleet-iq.onrender.com").replace(/\/+$/, "");
 const API_BASE = `${SERVER_ORIGIN}/api/mobile`;
@@ -225,6 +226,13 @@ function stopTime(value) {
   return value ? new Date(value).toLocaleString() : "";
 }
 
+function durationLabel(seconds = 0) {
+  const safeSeconds = Math.max(0, Number(seconds) || 0);
+  const hours = Math.floor(safeSeconds / 3600);
+  const minutes = Math.floor((safeSeconds % 3600) / 60);
+  return `${hours}h ${minutes}m`;
+}
+
 function DriverLoadCard({ load, index, onAction, busy }) {
   const nextStep = nextDriverStep(load);
   return (
@@ -258,16 +266,25 @@ function DriverLoadCard({ load, index, onAction, busy }) {
 
 function DriverHome({ token, onSignOut }) {
   const [driverData, setDriverData] = useState(null);
+  const [dutyData, setDutyData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [busyLoadId, setBusyLoadId] = useState(null);
+  const [busyDuty, setBusyDuty] = useState(false);
+  const [locationNotice, setLocationNotice] = useState("Checking tablet location permission…");
   const [error, setError] = useState("");
+  const locationPostBusy = useRef(false);
 
   const refreshLoads = useCallback(async (quiet = false) => {
     if (!quiet) setLoading(true);
     setError("");
     try {
-      setDriverData(await request("/driver/loads/", token));
+      const [loads, duty] = await Promise.all([
+        request("/driver/loads/", token),
+        request("/driver/duty-log/", token),
+      ]);
+      setDriverData(loads);
+      setDutyData(duty);
     } catch (exception) {
       setError(exception.message);
     } finally {
@@ -277,6 +294,65 @@ function DriverHome({ token, onSignOut }) {
   }, [token]);
 
   useEffect(() => { refreshLoads(); }, [refreshLoads]);
+
+  useEffect(() => {
+    let active = true;
+    let subscription = null;
+
+    async function startLocationWatch() {
+      try {
+        const permission = await Location.requestForegroundPermissionsAsync();
+        if (!active) return;
+        if (permission.status !== "granted") {
+          setLocationNotice("Location is off. You can still set your status manually.");
+          return;
+        }
+
+        setLocationNotice("Automatic Driving detection runs while this app is open.");
+        const nextSubscription = await Location.watchPositionAsync(
+          { accuracy: Location.Accuracy.High, timeInterval: 10000, distanceInterval: 50 },
+          async (location) => {
+            if (!active || locationPostBusy.current) return;
+            if ((location.coords.accuracy ?? 999) > 60) {
+              setLocationNotice("Waiting for a good location signal. You can still set your status manually.");
+              return;
+            }
+            locationPostBusy.current = true;
+            try {
+              const result = await request("/driver/location/", token, {
+                method: "POST",
+                body: JSON.stringify({
+                  latitude: location.coords.latitude,
+                  longitude: location.coords.longitude,
+                  accuracy: location.coords.accuracy,
+                  speed_mph: Math.max(0, location.coords.speed || 0) * 2.236936,
+                }),
+              });
+              if (active) {
+                setDutyData((current) => ({ ...current, ...result }));
+                if (result.automatic_change) setLocationNotice("Movement detected. Your status changed to Driving.");
+                else setLocationNotice("Automatic Driving detection is on while this app is open.");
+              }
+            } catch (exception) {
+              if (active) setLocationNotice("Location update paused. You can still set your status manually.");
+            } finally {
+              locationPostBusy.current = false;
+            }
+          },
+        );
+        if (active) subscription = nextSubscription;
+        else nextSubscription.remove();
+      } catch (exception) {
+        if (active) setLocationNotice("Location is unavailable. You can still set your status manually.");
+      }
+    }
+
+    startLocationWatch();
+    return () => {
+      active = false;
+      subscription?.remove();
+    };
+  }, [token]);
 
   async function recordStop(load, action) {
     setBusyLoadId(load.id);
@@ -288,6 +364,22 @@ function DriverHome({ token, onSignOut }) {
       setError(exception.message);
     } finally {
       setBusyLoadId(null);
+    }
+  }
+
+  async function changeDutyStatus(nextStatus) {
+    setBusyDuty(true);
+    setError("");
+    try {
+      await request("/driver/duty-status/", token, {
+        method: "POST",
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      await refreshLoads(true);
+    } catch (exception) {
+      setError(exception.message);
+    } finally {
+      setBusyDuty(false);
     }
   }
 
@@ -315,6 +407,53 @@ function DriverHome({ token, onSignOut }) {
         {driverData?.truck ? <Text style={styles.mutedText}>Truck {driverData.truck}</Text> : null}
         {error ? <Text accessibilityRole="alert" style={styles.errorBox}>{error}</Text> : null}
         {loading && !driverData ? <ActivityIndicator color={colors.blue} style={styles.loader} /> : null}
+        <View style={styles.dutyCard}>
+          <Text style={styles.eyebrow}>TODAY'S DAILY LOG</Text>
+          <Text style={styles.dutyCurrent}>Current status: {dutyData?.current_status_label || "Not started"}</Text>
+          <View style={styles.dutyTotals}>
+            <View style={styles.dutyTotal}><Text style={styles.dutyLabel}>WORKED</Text><Text style={styles.dutyValue}>{durationLabel(dutyData?.totals?.worked)}</Text></View>
+            <View style={styles.dutyTotal}><Text style={styles.dutyLabel}>DRIVING</Text><Text style={styles.dutyValue}>{durationLabel(dutyData?.totals?.driving)}</Text></View>
+            <View style={styles.dutyTotal}><Text style={styles.dutyLabel}>ON DUTY · NOT DRIVING</Text><Text style={styles.dutyValue}>{durationLabel(dutyData?.totals?.on_duty)}</Text></View>
+            <View style={styles.dutyTotal}><Text style={styles.dutyLabel}>OFF DUTY</Text><Text style={styles.dutyValue}>{durationLabel(dutyData?.totals?.off_duty)}</Text></View>
+          </View>
+          <Text style={styles.dutyPrompt}>Tap when your work status changes:</Text>
+          <Text style={styles.locationNotice}>{locationNotice}</Text>
+          <View style={styles.dutyActions}>
+            {[["on_duty", "On duty · not driving"], ["driving", "Driving"], ["off_duty", "Off duty"]].map(([status, label]) => (
+              <Pressable
+                key={status}
+                accessibilityRole="button"
+                accessibilityLabel={label}
+                disabled={busyDuty || dutyData?.current_status === status}
+                onPress={() => changeDutyStatus(status)}
+                style={({ pressed }) => [styles.dutyAction, dutyData?.current_status === status && styles.dutyActionActive, pressed && !busyDuty && styles.cardPressed]}
+              >
+                <Text style={[styles.dutyActionText, dutyData?.current_status === status && styles.dutyActionTextActive]}>{busyDuty ? "Saving…" : label}</Text>
+              </Pressable>
+            ))}
+          </View>
+          {(dutyData?.entries || []).length ? (
+            <View style={styles.dutyTimeline}>
+              <Text style={styles.dutyTimelineTitle}>TODAY'S TIMELINE</Text>
+              {dutyData.entries.map((entry, index) => (
+                <Text key={`${entry.started_at}-${index}`} style={styles.dutyTimelineText}>
+                  {new Date(entry.started_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} · {entry.status_label}{entry.source === "automatic" ? " · Auto" : ""} · {durationLabel(entry.duration_seconds)}{entry.active ? " · Current" : ""}
+                </Text>
+              ))}
+            </View>
+          ) : <Text style={styles.dutyEmpty}>Choose a status to start today's log.</Text>}
+          {(dutyData?.stop_events || []).length ? (
+            <View style={styles.dutyTimeline}>
+              <Text style={styles.dutyTimelineTitle}>PICKUP & DELIVERY UPDATES</Text>
+              {dutyData.stop_events.map((event, index) => (
+                <Text key={`${event.occurred_at}-${index}`} style={styles.dutyTimelineText}>
+                  {new Date(event.occurred_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} · {event.label} · {event.customer} · {event.location}
+                </Text>
+              ))}
+            </View>
+          ) : null}
+          <Text style={styles.dutyNote}>Movement can switch your status to Driving at 10 mph or after more than 2 miles. Keep this app open for automatic detection. This is an activity log, not a certified electronic log.</Text>
+        </View>
         {(driverData?.loads || []).length ? driverData.loads.map((load, index) => (
           <DriverLoadCard
             key={load.id}
@@ -417,8 +556,14 @@ export default function App() {
     ])
       .then(([savedToken, savedUserType]) => {
         if (!active || !savedToken) return;
+        if (savedUserType !== "driver") {
+          SecureStore.deleteItemAsync("gfleetiq_token").catch(() => {});
+          SecureStore.deleteItemAsync("gfleetiq_user_type").catch(() => {});
+          setError("This mobile app is for driver accounts. Office and admin accounts should use the G Fleet IQ website.");
+          return;
+        }
         setToken(savedToken);
-        setUserType(savedUserType || "office");
+        setUserType(savedUserType);
       })
       .catch(() => setError("Could not open the saved sign-in. Please sign in again."));
     return () => { active = false; };
@@ -443,10 +588,15 @@ export default function App() {
         method: "POST",
         body: JSON.stringify({ username: username.trim(), password }),
       });
+      if (result.user_type !== "driver") {
+        setPassword("");
+        setError("This mobile app is for driver accounts. Office and admin accounts should use the G Fleet IQ website.");
+        return;
+      }
       await SecureStore.setItemAsync("gfleetiq_token", result.token);
-      await SecureStore.setItemAsync("gfleetiq_user_type", result.user_type || "office");
+      await SecureStore.setItemAsync("gfleetiq_user_type", result.user_type);
       setToken(result.token);
-      setUserType(result.user_type || "office");
+      setUserType(result.user_type);
       setPassword("");
       setScreen("dashboard");
     } catch (exception) {
@@ -834,6 +984,24 @@ const styles = StyleSheet.create({
   assignmentText: { color: colors.muted, fontSize: 12, flex: 1 },
   priorityText: { color: colors.ink, fontSize: 11, fontWeight: "700" },
   emptyCard: { backgroundColor: colors.white, borderRadius: 14, borderColor: colors.border, borderWidth: 1, padding: 18, color: colors.muted },
+  dutyCard: { backgroundColor: colors.white, borderRadius: 16, borderColor: colors.border, borderWidth: 1, padding: 16, marginTop: 16, marginBottom: 18 },
+  dutyCurrent: { color: colors.ink, fontSize: 16, fontWeight: "800", marginTop: 7 },
+  dutyTotals: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 12 },
+  dutyTotal: { minWidth: "46%", flexGrow: 1, backgroundColor: colors.background, borderRadius: 10, padding: 10 },
+  dutyLabel: { color: colors.muted, fontSize: 9, fontWeight: "800", letterSpacing: 0.5 },
+  dutyValue: { color: colors.ink, fontSize: 17, fontWeight: "800", marginTop: 3 },
+  dutyPrompt: { color: colors.ink, fontSize: 13, fontWeight: "700", marginTop: 14 },
+  locationNotice: { color: colors.muted, fontSize: 11, lineHeight: 16, marginTop: 5 },
+  dutyActions: { gap: 8, marginTop: 9 },
+  dutyAction: { minHeight: 44, justifyContent: "center", paddingHorizontal: 12, borderRadius: 10, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.white },
+  dutyActionActive: { backgroundColor: colors.blue, borderColor: colors.blue },
+  dutyActionText: { color: colors.ink, fontWeight: "700", textAlign: "center" },
+  dutyActionTextActive: { color: colors.white },
+  dutyTimeline: { marginTop: 14, paddingTop: 12, borderTopWidth: 1, borderTopColor: colors.border },
+  dutyTimelineTitle: { color: colors.muted, fontSize: 10, fontWeight: "800", letterSpacing: 0.8, marginBottom: 7 },
+  dutyTimelineText: { color: colors.ink, fontSize: 12, lineHeight: 20 },
+  dutyEmpty: { color: colors.muted, fontSize: 12, marginTop: 12 },
+  dutyNote: { color: colors.muted, fontSize: 10, lineHeight: 15, marginTop: 12 },
   loader: { marginVertical: 24 },
   footerNote: { color: colors.muted, fontSize: 11, textAlign: "center", marginTop: 20 },
   tabBar: { backgroundColor: colors.white, borderTopColor: colors.border, borderTopWidth: 1, flexDirection: "row", paddingTop: 8, paddingBottom: 6 },

@@ -211,3 +211,42 @@ class Load(models.Model):
     company=models.ForeignKey(Company,on_delete=models.CASCADE,related_name="loads",null=True,blank=True)
     def __str__(self):
         return f"{self.customer} | {self.pickup} → {self.delivery}"
+
+
+class DriverDutyLog(models.Model):
+    STATUS_OFF_DUTY = "off_duty"
+    STATUS_ON_DUTY = "on_duty"
+    STATUS_DRIVING = "driving"
+    STATUS_CHOICES = [
+        (STATUS_OFF_DUTY, "Off duty"),
+        (STATUS_ON_DUTY, "On duty, not driving"),
+        (STATUS_DRIVING, "Driving"),
+    ]
+    SOURCE_MANUAL = "manual"
+    SOURCE_AUTOMATIC = "automatic"
+    SOURCE_CHOICES = [
+        (SOURCE_MANUAL, "Manual"),
+        (SOURCE_AUTOMATIC, "Automatic movement detection"),
+    ]
+
+    account = models.ForeignKey(FleetAccount, on_delete=models.CASCADE, related_name="driver_duty_logs")
+    driver = models.ForeignKey(Driver, on_delete=models.CASCADE, related_name="duty_logs")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+    source = models.CharField(max_length=12, choices=SOURCE_CHOICES, default=SOURCE_MANUAL)
+    started_at = models.DateTimeField()
+    ended_at = models.DateTimeField(null=True, blank=True)
+    movement_distance_miles = models.FloatField(default=0)
+    last_latitude = models.FloatField(null=True, blank=True)
+    last_longitude = models.FloatField(null=True, blank=True)
+    last_location_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["started_at", "id"]
+        indexes = [
+            models.Index(fields=["account", "started_at"], name="duty_account_start_idx"),
+            models.Index(fields=["driver", "started_at"], name="duty_driver_start_idx"),
+        ]
+
+    def __str__(self):
+        return f"{self.driver.name} — {self.get_status_display()} — {self.started_at}"

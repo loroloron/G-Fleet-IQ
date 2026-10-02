@@ -1,4 +1,8 @@
+import math
+from datetime import datetime, time, timedelta
+
 from django.db import transaction
+from django.db.models import Q
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -17,6 +21,7 @@ from fleet.models import (
     CompanyMembership,
     Customer,
     Driver,
+    DriverDutyLog,
     Load,
     Trailer,
     Truck,
@@ -222,6 +227,219 @@ def _driver_load_data(load):
         "delivery_departed_at": load.delivery_departed_at.isoformat() if load.delivery_departed_at else None,
     })
     return data
+
+
+def _duty_day_bounds(day):
+    current_timezone = timezone.get_current_timezone()
+    start = timezone.make_aware(datetime.combine(day, time.min), current_timezone)
+    end = start + timedelta(days=1)
+    return start, end
+
+
+def _driver_duty_day(driver, day):
+    start, end = _duty_day_bounds(day)
+    now = timezone.now()
+    entries = []
+    totals = {key: 0 for key in ("off_duty", "on_duty", "driving")}
+    logs = DriverDutyLog.objects.filter(
+        account=driver.account,
+        driver=driver,
+        started_at__lt=end,
+    ).filter(Q(ended_at__isnull=True) | Q(ended_at__gt=start)).order_by("started_at", "id")
+
+    for log in logs:
+        clipped_start = max(log.started_at, start)
+        clipped_end = min(log.ended_at or now, end, now)
+        seconds = max(0, int((clipped_end - clipped_start).total_seconds()))
+        totals[log.status] += seconds
+        is_active = log.ended_at is None and day == timezone.localdate()
+        entries.append({
+            "status": log.status,
+            "status_label": log.get_status_display(),
+            "source": log.source,
+            "source_label": log.get_source_display(),
+            "started_at": clipped_start.isoformat(),
+            "ended_at": None if is_active else clipped_end.isoformat(),
+            "duration_seconds": seconds,
+            "active": is_active,
+        })
+
+    active = next((entry for entry in reversed(entries) if entry["active"]), None)
+    stop_events = []
+    for load in Load.objects.filter(account=driver.account, driver=driver).filter(
+        Q(pickup_arrived_at__gte=start, pickup_arrived_at__lt=end)
+        | Q(pickup_departed_at__gte=start, pickup_departed_at__lt=end)
+        | Q(delivery_arrived_at__gte=start, delivery_arrived_at__lt=end)
+        | Q(delivery_departed_at__gte=start, delivery_departed_at__lt=end)
+    ).select_related("customer"):
+        for field, label, location in (
+            ("pickup_arrived_at", "Arrived at pickup", load.pickup),
+            ("pickup_departed_at", "Departed pickup", load.pickup),
+            ("delivery_arrived_at", "Arrived at delivery", load.delivery),
+            ("delivery_departed_at", "Departed delivery", load.delivery),
+        ):
+            occurred_at = getattr(load, field)
+            if occurred_at and start <= occurred_at < end:
+                stop_events.append({
+                    "label": label,
+                    "occurred_at": occurred_at.isoformat(),
+                    "customer": load.customer.name,
+                    "location": location,
+                })
+    stop_events.sort(key=lambda item: item["occurred_at"])
+    return {
+        "date": day.isoformat(),
+        "current_status": active["status"] if active else None,
+        "current_status_label": active["status_label"] if active else "Not started",
+        "totals": {
+            **totals,
+            "worked": totals["on_duty"] + totals["driving"],
+        },
+        "entries": entries,
+        "stop_events": stop_events,
+    }
+
+
+class MobileDriverDutyLogView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        driver = Driver.objects.filter(user=request.user).select_related("account").first()
+        if driver is None:
+            return Response({"detail": "This sign-in is not linked to a driver."}, status=403)
+        requested_day = request.query_params.get("date")
+        try:
+            day = datetime.strptime(requested_day, "%Y-%m-%d").date() if requested_day else timezone.localdate()
+        except ValueError:
+            return Response({"detail": "Use a date in YYYY-MM-DD format."}, status=400)
+        return Response({"driver": driver.name, **_driver_duty_day(driver, day)})
+
+    def post(self, request):
+        driver = Driver.objects.filter(user=request.user).select_related("account").first()
+        if driver is None:
+            return Response({"detail": "This sign-in is not linked to a driver."}, status=403)
+        selected_status = request.data.get("status")
+        if selected_status not in dict(DriverDutyLog.STATUS_CHOICES):
+            return Response({"detail": "Choose off_duty, on_duty, or driving."}, status=400)
+
+        with transaction.atomic():
+            locked_driver = Driver.objects.select_for_update().select_related("account").get(pk=driver.pk)
+            current = DriverDutyLog.objects.select_for_update().filter(
+                account=locked_driver.account,
+                driver=locked_driver,
+                ended_at__isnull=True,
+            ).order_by("-started_at", "-id").first()
+            if current and current.status == selected_status:
+                return Response({"detail": "That duty status is already active."}, status=409)
+            now = timezone.now()
+            if current:
+                current.ended_at = now
+                current.last_latitude = None
+                current.last_longitude = None
+                current.last_location_at = None
+                current.movement_distance_miles = 0
+                current.save(update_fields=[
+                    "ended_at", "last_latitude", "last_longitude",
+                    "last_location_at", "movement_distance_miles",
+                ])
+            DriverDutyLog.objects.create(
+                account=locked_driver.account,
+                driver=locked_driver,
+                status=selected_status,
+                started_at=now,
+            )
+        return Response(_driver_duty_day(locked_driver, timezone.localdate()))
+
+
+class MobileDriverLocationView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        driver = Driver.objects.filter(user=request.user).select_related("account").first()
+        if driver is None:
+            return Response({"detail": "This sign-in is not linked to a driver."}, status=403)
+        try:
+            latitude = float(request.data.get("latitude"))
+            longitude = float(request.data.get("longitude"))
+            accuracy = float(request.data.get("accuracy"))
+            speed_mph = max(0, float(request.data.get("speed_mph") or 0))
+        except (TypeError, ValueError):
+            return Response({"detail": "A valid tablet location is required."}, status=400)
+        if not (-90 <= latitude <= 90 and -180 <= longitude <= 180):
+            return Response({"detail": "The tablet location is invalid."}, status=400)
+
+        with transaction.atomic():
+            locked_driver = Driver.objects.select_for_update().select_related("account").get(pk=driver.pk)
+            current = DriverDutyLog.objects.select_for_update().filter(
+                account=locked_driver.account,
+                driver=locked_driver,
+                ended_at__isnull=True,
+            ).order_by("-started_at", "-id").first()
+            now = timezone.now()
+            switched_to_driving = False
+
+            if current is None:
+                if accuracy <= 60 and speed_mph >= 10:
+                    DriverDutyLog.objects.create(
+                        account=locked_driver.account,
+                        driver=locked_driver,
+                        status=DriverDutyLog.STATUS_DRIVING,
+                        source=DriverDutyLog.SOURCE_AUTOMATIC,
+                        started_at=now,
+                    )
+                    switched_to_driving = True
+            elif current.status != DriverDutyLog.STATUS_DRIVING and accuracy <= 60:
+                segment_miles = 0
+                if current.last_latitude is not None and current.last_longitude is not None and current.last_location_at:
+                    elapsed = (now - current.last_location_at).total_seconds()
+                    segment_miles = _great_circle_miles(
+                        current.last_latitude, current.last_longitude, latitude, longitude
+                    )
+                    average_mph = segment_miles * 3600 / elapsed if elapsed > 0 else 999
+                    if elapsed <= 0 or elapsed > 300 or average_mph < 3 or average_mph > 100 or segment_miles > 5:
+                        segment_miles = 0
+                current.movement_distance_miles += segment_miles
+                current.last_latitude = latitude
+                current.last_longitude = longitude
+                current.last_location_at = now
+                if speed_mph >= 10 or current.movement_distance_miles > 2:
+                    current.ended_at = now
+                    current.last_latitude = None
+                    current.last_longitude = None
+                    current.last_location_at = None
+                    current.movement_distance_miles = 0
+                    current.save(update_fields=[
+                        "ended_at", "movement_distance_miles", "last_latitude",
+                        "last_longitude", "last_location_at",
+                    ])
+                    DriverDutyLog.objects.create(
+                        account=locked_driver.account,
+                        driver=locked_driver,
+                        status=DriverDutyLog.STATUS_DRIVING,
+                        source=DriverDutyLog.SOURCE_AUTOMATIC,
+                        started_at=now,
+                    )
+                    switched_to_driving = True
+                else:
+                    current.save(update_fields=[
+                        "movement_distance_miles", "last_latitude", "last_longitude", "last_location_at",
+                    ])
+
+        return Response({
+            **_driver_duty_day(locked_driver, timezone.localdate()),
+            "automatic_change": switched_to_driving,
+        })
+
+
+def _great_circle_miles(latitude_a, longitude_a, latitude_b, longitude_b):
+    earth_radius_miles = 3958.7613
+    lat_a, lat_b = math.radians(latitude_a), math.radians(latitude_b)
+    lat_delta = lat_b - lat_a
+    lon_delta = math.radians(longitude_b - longitude_a)
+    value = math.sin(lat_delta / 2) ** 2 + math.cos(lat_a) * math.cos(lat_b) * math.sin(lon_delta / 2) ** 2
+    return earth_radius_miles * 2 * math.asin(min(1, math.sqrt(value)))
 
 
 class MobileDriverLoadsView(APIView):

@@ -1,10 +1,13 @@
+from datetime import date, datetime, time, timedelta
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.db.models import Avg, Sum
+from django.db.models import Avg, Sum, Q
+from django.utils import timezone
 
 from fleet.models import (
     Company,
@@ -13,6 +16,7 @@ from fleet.models import (
     CompanyMembership,
     Customer,
     Driver,
+    DriverDutyLog,
     Truck,
     Trailer,
     Load,
@@ -252,23 +256,98 @@ def home(request):
         "trailers": _scope_queryset(request, Trailer).count(),
         "loads": _scope_queryset(request, Load).count(),
         "customers": _scope_queryset(request, Customer).count(),
-
         "total_revenue": total_revenue,
         "total_profit": total_profit,
         "average_profit": average_profit,
     }
-
-    return render(
-        request,
-        "dashboard/home.html",
-        context,
-    )
-   
-
-   
+    return render(request, "dashboard/home.html", context)
 
 
-# ==========================================================
+def driver_logs(request):
+    requested_day = request.GET.get("date", "").strip()
+    try:
+        selected_day = date.fromisoformat(requested_day) if requested_day else timezone.localdate()
+    except ValueError:
+        selected_day = timezone.localdate()
+
+    current_timezone = timezone.get_current_timezone()
+    day_start = timezone.make_aware(datetime.combine(selected_day, time.min), current_timezone)
+    day_end = day_start + timedelta(days=1)
+    now = timezone.now()
+    drivers = _scope_queryset(request, Driver).select_related("company", "truck").order_by("name")
+    driver_list = list(drivers)
+    daily_drivers = []
+
+    def formatted_duration(seconds):
+        hours, remainder = divmod(seconds, 3600)
+        minutes = remainder // 60
+        return f"{hours}h {minutes}m"
+
+    for driver in driver_list:
+        entries = []
+        totals = {"off_duty": 0, "on_duty": 0, "driving": 0}
+        logs = DriverDutyLog.objects.filter(
+            account=request.account,
+            driver=driver,
+            started_at__lt=day_end,
+        ).filter(Q(ended_at__isnull=True) | Q(ended_at__gt=day_start)).order_by("started_at", "id")
+
+        for log in logs:
+            entry_start = max(log.started_at, day_start)
+            entry_end = min(log.ended_at or now, day_end, now)
+            seconds = max(0, int((entry_end - entry_start).total_seconds()))
+            totals[log.status] = totals.get(log.status, 0) + seconds
+            entries.append({
+                "status": log.get_status_display(),
+                "source": log.get_source_display(),
+                "automatic": log.source == DriverDutyLog.SOURCE_AUTOMATIC,
+                "start": entry_start,
+                "end": entry_end if log.ended_at or selected_day < timezone.localdate() else None,
+                "seconds": seconds,
+                "active": log.ended_at is None and selected_day == timezone.localdate(),
+                "duration": formatted_duration(seconds),
+            })
+
+        daily_drivers.append({
+            "driver": driver,
+            "entries": entries,
+            "off_duty": formatted_duration(totals["off_duty"]),
+            "on_duty": formatted_duration(totals["on_duty"]),
+            "driving": formatted_duration(totals["driving"]),
+            "worked": formatted_duration(totals["on_duty"] + totals["driving"]),
+        })
+
+    stop_events = []
+    loads_with_stops = _scope_queryset(request, Load).filter(driver__in=driver_list).filter(
+        Q(pickup_arrived_at__gte=day_start, pickup_arrived_at__lt=day_end)
+        | Q(pickup_departed_at__gte=day_start, pickup_departed_at__lt=day_end)
+        | Q(delivery_arrived_at__gte=day_start, delivery_arrived_at__lt=day_end)
+        | Q(delivery_departed_at__gte=day_start, delivery_departed_at__lt=day_end)
+    ).select_related("driver", "customer")
+    for load in loads_with_stops:
+        for field, label, location in (
+            ("pickup_arrived_at", "Arrived at pickup", load.pickup),
+            ("pickup_departed_at", "Departed pickup", load.pickup),
+            ("delivery_arrived_at", "Arrived at delivery", load.delivery),
+            ("delivery_departed_at", "Departed delivery", load.delivery),
+        ):
+            occurred_at = getattr(load, field)
+            if occurred_at and day_start <= occurred_at < day_end:
+                stop_events.append({
+                    "driver": load.driver.name if load.driver_id else "—",
+                    "customer": load.customer.name,
+                    "label": label,
+                    "location": location,
+                    "occurred_at": occurred_at,
+                })
+    stop_events.sort(key=lambda item: item["occurred_at"])
+
+    return render(request, "dashboard/driver_logs.html", {
+        "selected_day": selected_day.isoformat(),
+        "daily_drivers": daily_drivers,
+        "stop_events": stop_events,
+    })
+
 # DRIVERS
 # ==========================================================
 
