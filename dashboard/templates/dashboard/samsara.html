@@ -1,0 +1,48 @@
+{% extends "dashboard/base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h1 class="h3 mb-3">Samsara connection</h1>
+                <p class="text-muted">Connect this trucking company’s Samsara organization to G-Fleet-IQ. Each company authorizes its own Samsara account.</p>
+
+                {% if connection %}
+                    <div class="alert alert-success" role="status">
+                        <strong>Connected</strong><br>
+                        {{ connection.organization_name }}<br>
+                        Connected {{ connection.connected_at|date:"M j, Y g:i A" }}
+                    </div>
+                    <p class="mb-0">The secure connection is saved for this company account. Samsara data is not being displayed in G-Fleet-IQ yet.</p>
+                {% elif samsara_configured %}
+                    <p>Continue to Samsara and approve the connection for this company.</p>
+                    <form method="post" action="{% url 'samsara_connect' %}">
+                        {% csrf_token %}
+                        <button class="btn btn-primary" type="submit">Connect Samsara</button>
+                    </form>
+                {% else %}
+                    <div class="alert alert-info" role="status">
+                        <strong>One setup step remains.</strong>
+                        G-Fleet-IQ needs its Samsara OAuth app credentials and secure token key before the Connect button can work.
+                    </div>
+                    <ol>
+                        <li>Create a Samsara OAuth app in the Samsara developer portal.</li>
+                        <li>Set its redirect URL to <code>{{ request.scheme }}://{{ request.get_host }}{% url 'samsara_callback' %}</code>.</li>
+                        <li>Add the app ID, app secret, redirect URL, and a private encryption key to the server’s environment settings.</li>
+                    </ol>
+                    <p>Server settings needed:</p>
+                    <ul>
+                        <li><code>SAMSARA_CLIENT_ID</code></li>
+                        <li><code>SAMSARA_CLIENT_SECRET</code></li>
+                        <li><code>SAMSARA_REDIRECT_URI</code></li>
+                        <li><code>SAMSARA_TOKEN_ENCRYPTION_KEY</code></li>
+                    </ul>
+                    <p class="mb-0"><a href="https://developers.samsara.com/docs/oauth-20" target="_blank" rel="noopener">Samsara OAuth setup guide</a></p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -10,6 +10,34 @@ class FleetAccount(models.Model):
         return self.name
 
 
+class SamsaraConnection(models.Model):
+    """OAuth credentials for one customer's Samsara organization."""
+
+    account = models.OneToOneField(
+        FleetAccount,
+        on_delete=models.CASCADE,
+        related_name="samsara_connection",
+    )
+    organization_id = models.CharField(max_length=100, blank=True)
+    organization_name = models.CharField(max_length=200, blank=True)
+    access_token_encrypted = models.TextField()
+    refresh_token_encrypted = models.TextField()
+    access_token_expires_at = models.DateTimeField()
+    scopes = models.CharField(max_length=500, blank=True)
+    connected_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    connected_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="samsara_connections_created",
+    )
+
+    def __str__(self):
+        return self.organization_name or f"Samsara connection for {self.account}"
+
+
 class AccountMembership(models.Model):
     ROLE_OWNER = "owner"
     ROLE_ADMIN = "admin"

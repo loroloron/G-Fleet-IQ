@@ -71,6 +71,13 @@ REST_FRAMEWORK = {
     },
 }
 
+# Samsara OAuth values are configured in the deployment environment, never in
+# source control. Each G-Fleet-IQ customer authorizes their own Samsara org.
+SAMSARA_CLIENT_ID = os.environ.get("SAMSARA_CLIENT_ID", "")
+SAMSARA_CLIENT_SECRET = os.environ.get("SAMSARA_CLIENT_SECRET", "")
+SAMSARA_REDIRECT_URI = os.environ.get("SAMSARA_REDIRECT_URI", "")
+SAMSARA_TOKEN_ENCRYPTION_KEY = os.environ.get("SAMSARA_TOKEN_ENCRYPTION_KEY", "")
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',

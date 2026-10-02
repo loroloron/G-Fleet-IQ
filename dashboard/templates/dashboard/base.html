@@ -92,6 +92,11 @@
                 <a class="nav-link" href="{% url 'fleet_map' %}">
                     🗺️ {% translate "Fleet Map" %}
                 </a>
+                {% if request.is_account_admin %}
+                <a class="nav-link" href="{% url 'samsara_integration' %}">
+                    🔗 {% translate "Samsara" %}
+                </a>
+                {% endif %}
                 {% if request.account_membership.role == "owner" %}
                 <a class="nav-link" href="{% url 'account_team' %}">{% translate "Administrators" %}</a>
                 {% endif %}
