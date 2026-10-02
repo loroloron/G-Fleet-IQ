@@ -51,7 +51,7 @@
                     🏠 {% translate "Dashboard" %}
                 </a>
 
-                {% if request.is_account_admin %}
+                {% if request.can_manage_samsara %}
                 <a class="nav-link" href="{% url 'companies' %}">
                     🏢 {% translate "Client Companies" %}
                 </a>

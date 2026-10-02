@@ -13,8 +13,8 @@ class FleetAccount(models.Model):
 class SamsaraConnection(models.Model):
     """OAuth credentials for one customer's Samsara organization."""
 
-    account = models.OneToOneField(
-        FleetAccount,
+    company = models.OneToOneField(
+        "Company",
         on_delete=models.CASCADE,
         related_name="samsara_connection",
     )
@@ -35,7 +35,7 @@ class SamsaraConnection(models.Model):
     )
 
     def __str__(self):
-        return self.organization_name or f"Samsara connection for {self.account}"
+        return self.organization_name or f"Samsara connection for {self.company}"
 
 
 class AccountMembership(models.Model):

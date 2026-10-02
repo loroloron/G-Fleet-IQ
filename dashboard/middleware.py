@@ -45,6 +45,10 @@ class RequireLoginMiddleware:
         request.account_membership = account_membership
         request.company_memberships = client_memberships
         request.is_account_admin = bool(account_membership)
+        request.can_manage_samsara = bool(account_membership) or any(
+            item.role == CompanyMembership.ROLE_CLIENT_ADMIN
+            for item in client_memberships
+        )
         request.account = (
             account_membership.account
             if account_membership

@@ -6,26 +6,44 @@
     <div class="col-lg-8">
         <div class="card shadow-sm">
             <div class="card-body p-4">
-                <h1 class="h3 mb-3">Samsara connection</h1>
-                <p class="text-muted">Connect this trucking company’s Samsara organization to G-Fleet-IQ. Each company authorizes its own Samsara account.</p>
+                <h1 class="h3 mb-3">Connect Samsara</h1>
+                <p class="text-muted">G-Fleet-IQ is the fleet management app. Each client company can securely connect its own Samsara account here.</p>
 
-                {% if connection %}
+                {% if companies.count > 1 %}
+                    <form method="get" action="{% url 'samsara_integration' %}" class="mb-4">
+                        <label class="form-label" for="samsara-company">Client company</label>
+                        <div class="d-flex gap-2">
+                            <select class="form-select" id="samsara-company" name="company_id" required>
+                                <option value="">Choose a client company</option>
+                                {% for company in companies %}
+                                    <option value="{{ company.pk }}"{% if selected_company.pk == company.pk %} selected{% endif %}>{{ company.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <button class="btn btn-outline-primary" type="submit">Choose</button>
+                        </div>
+                    </form>
+                {% elif selected_company %}
+                    <p><strong>Client company:</strong> {{ selected_company.name }}</p>
+                {% endif %}
+
+                {% if selected_company and connection %}
                     <div class="alert alert-success" role="status">
                         <strong>Connected</strong><br>
                         {{ connection.organization_name }}<br>
                         Connected {{ connection.connected_at|date:"M j, Y g:i A" }}
                     </div>
-                    <p class="mb-0">The secure connection is saved for this company account. Samsara data is not being displayed in G-Fleet-IQ yet.</p>
-                {% elif samsara_configured %}
-                    <p>Continue to Samsara and approve the connection for this company.</p>
+                    <p class="mb-0">The connection is saved for {{ selected_company.name }}. Showing Samsara data in G-Fleet-IQ is the next integration step.</p>
+                {% elif selected_company and samsara_configured %}
+                    <p>Continue to Samsara and approve the connection for {{ selected_company.name }}.</p>
                     <form method="post" action="{% url 'samsara_connect' %}">
                         {% csrf_token %}
+                        <input type="hidden" name="company_id" value="{{ selected_company.pk }}">
                         <button class="btn btn-primary" type="submit">Connect Samsara</button>
                     </form>
-                {% else %}
+                {% elif not samsara_configured %}
                     <div class="alert alert-info" role="status">
                         <strong>One setup step remains.</strong>
-                        G-Fleet-IQ needs its Samsara OAuth app credentials and secure token key before the Connect button can work.
+                        G-Fleet-IQ needs its Samsara app credentials and secure token key before clients can connect their accounts.
                     </div>
                     <ol>
                         <li>Create a Samsara OAuth app in the Samsara developer portal.</li>
@@ -40,6 +58,8 @@
                         <li><code>SAMSARA_TOKEN_ENCRYPTION_KEY</code></li>
                     </ul>
                     <p class="mb-0"><a href="https://developers.samsara.com/docs/oauth-20" target="_blank" rel="noopener">Samsara OAuth setup guide</a></p>
+                {% else %}
+                    <div class="alert alert-info" role="status">Choose the client company whose Samsara account should be connected.</div>
                 {% endif %}
             </div>
         </div>

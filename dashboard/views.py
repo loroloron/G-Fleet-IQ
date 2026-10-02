@@ -4,6 +4,7 @@ import hmac
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseForbidden
+from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
@@ -68,11 +69,37 @@ def landing(request):
     return render(request, "dashboard/landing.html")
 
 
+def _samsara_manageable_companies(request):
+    companies = Company.objects.filter(account=request.account, active=True)
+    if request.is_account_admin:
+        return companies.order_by("name")
+    return companies.filter(
+        memberships__user=request.user,
+        memberships__active=True,
+        memberships__role=CompanyMembership.ROLE_CLIENT_ADMIN,
+    ).distinct().order_by("name")
+
+
+def _samsara_company_redirect(company_id=None):
+    url = reverse("samsara_integration")
+    return redirect(f"{url}?company_id={company_id}" if company_id else url)
+
+
 def samsara_integration(request):
-    if not request.is_account_admin:
-        return HttpResponseForbidden("Only a company account administrator can connect Samsara.")
-    connection = SamsaraConnection.objects.filter(account=request.account).first()
+    companies = _samsara_manageable_companies(request)
+    if not companies.exists():
+        return HttpResponseForbidden("Only a G-Fleet-IQ administrator or client company administrator can connect Samsara.")
+    company_id = request.GET.get("company_id")
+    if company_id:
+        company = companies.filter(pk=company_id).first()
+        if not company:
+            return HttpResponseForbidden("You do not have access to that client company.")
+    else:
+        company = companies.first() if companies.count() == 1 else None
+    connection = SamsaraConnection.objects.filter(company=company).first() if company else None
     return render(request, "dashboard/samsara.html", {
+        "companies": companies,
+        "selected_company": company,
         "connection": connection,
         "samsara_configured": samsara_oauth_is_configured(),
     })
@@ -81,16 +108,19 @@ def samsara_integration(request):
 def samsara_connect(request):
     if request.method != "POST":
         return HttpResponseForbidden("Use the connect button to start authorization.")
-    if not request.is_account_admin:
-        return HttpResponseForbidden("Only a company account administrator can connect Samsara.")
+    companies = _samsara_manageable_companies(request)
+    company = companies.filter(pk=request.POST.get("company_id", "")).first()
+    if not company:
+        return HttpResponseForbidden("Choose a client company you are allowed to manage.")
     if not samsara_oauth_is_configured():
         messages.error(request, "Samsara connection setup is not finished yet. The app credentials need to be added to the secure server settings.")
-        return redirect("samsara_integration")
+        return _samsara_company_redirect(company.pk)
 
     state = secrets.token_urlsafe(32)
     request.session["samsara_oauth_state"] = state
     request.session["samsara_oauth_account_id"] = request.account.pk
     request.session["samsara_oauth_user_id"] = request.user.pk
+    request.session["samsara_oauth_company_id"] = company.pk
     return redirect(samsara_authorization_url(state))
 
 
@@ -98,6 +128,7 @@ def samsara_callback(request):
     expected_state = request.session.pop("samsara_oauth_state", "")
     account_id = request.session.pop("samsara_oauth_account_id", None)
     user_id = request.session.pop("samsara_oauth_user_id", None)
+    company_id = request.session.pop("samsara_oauth_company_id", None)
     returned_state = request.GET.get("state", "")
     if not expected_state or not returned_state or not hmac.compare_digest(expected_state, returned_state):
         messages.error(request, "Samsara connection could not be verified. Please start again.")
@@ -105,20 +136,21 @@ def samsara_callback(request):
     if not request.user.is_authenticated or user_id != request.user.pk or account_id != getattr(request.account, "pk", None):
         messages.error(request, "The company account changed during Samsara authorization. Please start again.")
         return redirect("samsara_integration")
-    if not request.is_account_admin:
-        return HttpResponseForbidden("Only a company account administrator can connect Samsara.")
+    company = _samsara_manageable_companies(request).filter(pk=company_id).first()
+    if not company:
+        return HttpResponseForbidden("You no longer have access to the client company for this Samsara connection.")
     if request.GET.get("error"):
         messages.error(request, "Samsara authorization was cancelled or declined. You can try again.")
-        return redirect("samsara_integration")
+        return _samsara_company_redirect(company.pk)
 
     code = request.GET.get("code", "")
     if not code:
         messages.error(request, "Samsara did not return an authorization code. Please try again.")
-        return redirect("samsara_integration")
+        return _samsara_company_redirect(company.pk)
     try:
         token_data = exchange_samsara_code(code)
         SamsaraConnection.objects.update_or_create(
-            account=request.account,
+            company=company,
             defaults={
                 "organization_name": "Samsara organization",
                 "access_token_encrypted": encrypt_samsara_token(token_data["access_token"]),
@@ -130,10 +162,10 @@ def samsara_callback(request):
         )
     except SamsaraError as exc:
         messages.error(request, str(exc))
-        return redirect("samsara_integration")
+        return _samsara_company_redirect(company.pk)
 
-    messages.success(request, "Samsara is connected to this G-Fleet-IQ company account.")
-    return redirect("samsara_integration")
+    messages.success(request, f"Samsara is connected for {company.name}.")
+    return _samsara_company_redirect(company.pk)
 
 
 def _scope_queryset(request, model, writable=None):
