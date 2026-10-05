@@ -1,5 +1,12 @@
 from django.contrib import admin
-from .models import AccountMembership, Company, CompanyMembership, FleetAccount, Truck, Trailer, Driver, Customer, Load
+from .models import AccountMembership, Company, CompanyInvoice, CompanyMembership, FleetAccount, Truck, Trailer, Driver, Customer, Load
+
+
+@admin.register(CompanyInvoice)
+class CompanyInvoiceAdmin(admin.ModelAdmin):
+    list_display = ("invoice_number", "company", "period_start", "total", "status", "due_date")
+    list_filter = ("status", "period_start")
+    search_fields = ("company__name",)
 
 
 @admin.register(FleetAccount)
