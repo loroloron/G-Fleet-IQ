@@ -1,0 +1,59 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+  <div>
+    <h1 class="h2">Billing &amp; invoices</h1>
+    <p class="text-muted mb-0">Monthly service pricing: <strong>$30 per active truck</strong> and <strong>$15 per trailer</strong>.</p>
+  </div>
+</div>
+
+<div class="alert alert-info">
+  Invoices are created here in G-Fleet-IQ. Payment collection is not connected yet, so send the invoice to the customer and record payment here after it is received.
+</div>
+
+{% if can_create_invoices %}
+<section class="card shadow-sm mb-4">
+  <div class="card-body">
+    <h2 class="h5">Create this month’s invoice</h2>
+    <p class="text-muted">The invoice uses the company’s active trucks and all trailers assigned to that company. Each company can have one invoice per month.</p>
+    <form method="post" class="row g-2 align-items-end">
+      {% csrf_token %}
+      <div class="col-sm-8 col-md-6">
+        <label for="company_id" class="form-label">Customer company</label>
+        <select id="company_id" name="company_id" class="form-select" required>
+          <option value="">Choose a company</option>
+          {% for company in companies %}<option value="{{ company.pk }}">{{ company.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-auto"><button class="btn btn-primary" type="submit" {% if not companies %}disabled{% endif %}>Create invoice</button></div>
+    </form>
+  </div>
+</section>
+{% endif %}
+
+<section class="card shadow-sm">
+  <div class="card-body">
+    <h2 class="h5 mb-3">Invoices</h2>
+    {% if invoices %}
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead><tr><th>Invoice</th><th>Company</th><th>Month</th><th>Total</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+        {% for invoice in invoices %}
+          <tr>
+            <td>{{ invoice.invoice_number }}</td>
+            <td>{{ invoice.company.name }}</td>
+            <td>{{ invoice.period_start|date:"F Y" }}</td>
+            <td>${{ invoice.total|floatformat:2 }}</td>
+            <td><span class="badge text-bg-{% if invoice.status == 'paid' %}success{% elif invoice.status == 'void' %}secondary{% else %}warning{% endif %}">{{ invoice.get_status_display }}</span></td>
+            <td><a class="btn btn-sm btn-outline-primary" href="{% url 'invoice_detail' invoice.pk %}">View invoice</a></td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}<p class="text-muted mb-0">No invoices have been created yet.</p>{% endif %}
+  </div>
+</section>
+{% endblock %}

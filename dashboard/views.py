@@ -1,4 +1,5 @@
 from datetime import date, datetime, time, timedelta
+import calendar
 import secrets
 import hmac
 
@@ -25,6 +26,7 @@ from fleet.models import (
     Trailer,
     Load,
     SamsaraConnection,
+    CompanyInvoice,
 )
 
 from .samsara import (
@@ -186,6 +188,68 @@ def _form_company_ids(request):
     if request.is_account_admin:
         return None
     return request.write_company_ids if request.method == "POST" else request.allowed_company_ids
+
+
+def billing(request):
+    companies = Company.objects.filter(account=request.account, active=True).order_by("name")
+    invoices = CompanyInvoice.objects.filter(company__account=request.account).select_related("company")
+    if not request.is_account_admin:
+        companies = companies.filter(pk__in=request.allowed_company_ids)
+        invoices = invoices.filter(company_id__in=request.allowed_company_ids)
+
+    if request.method == "POST":
+        if not request.is_account_admin:
+            return HttpResponseForbidden("Only a G-Fleet-IQ account administrator can create invoices.")
+        company = get_object_or_404(companies, pk=request.POST.get("company_id"))
+        today = timezone.localdate()
+        period_start = today.replace(day=1)
+        period_end = today.replace(day=calendar.monthrange(today.year, today.month)[1])
+        truck_count = Truck.objects.filter(account=request.account, company=company, active=True).count()
+        trailer_count = Trailer.objects.filter(account=request.account, company=company).count()
+        invoice, created = CompanyInvoice.objects.get_or_create(
+            company=company,
+            period_start=period_start,
+            period_end=period_end,
+            defaults={
+                "due_date": today + timedelta(days=30),
+                "truck_count": truck_count,
+                "trailer_count": trailer_count,
+                "created_by": request.user,
+            },
+        )
+        if created:
+            messages.success(request, f"Invoice {invoice.invoice_number} created for {company.name}.")
+        else:
+            messages.info(request, f"An invoice already exists for {company.name} for this month.")
+        return redirect("invoice_detail", invoice_id=invoice.pk)
+
+    return render(request, "dashboard/billing.html", {
+        "companies": companies,
+        "invoices": invoices,
+        "can_create_invoices": request.is_account_admin,
+    })
+
+
+def invoice_detail(request, invoice_id):
+    invoices = CompanyInvoice.objects.filter(company__account=request.account).select_related("company")
+    if not request.is_account_admin:
+        invoices = invoices.filter(company_id__in=request.allowed_company_ids)
+    invoice = get_object_or_404(invoices, pk=invoice_id)
+
+    if request.method == "POST":
+        if not request.is_account_admin:
+            return HttpResponseForbidden("Only a G-Fleet-IQ account administrator can update invoice status.")
+        action = request.POST.get("action")
+        if action == "mark_paid" and invoice.status == CompanyInvoice.STATUS_ISSUED:
+            invoice.status = CompanyInvoice.STATUS_PAID
+            invoice.save(update_fields=["status"])
+            messages.success(request, "Invoice marked as paid.")
+        return redirect("invoice_detail", invoice_id=invoice.pk)
+
+    return render(request, "dashboard/invoice_detail.html", {
+        "invoice": invoice,
+        "can_manage_invoices": request.is_account_admin,
+    })
 
 
 def sign_up(request):

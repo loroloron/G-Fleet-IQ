@@ -1,0 +1,43 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 no-print">
+  <a href="{% url 'billing' %}" class="btn btn-outline-secondary">← Back to billing</a>
+  <button type="button" class="btn btn-outline-primary" onclick="window.print()">Print / save as PDF</button>
+</div>
+
+<article class="card shadow-sm mx-auto" style="max-width: 850px;">
+  <div class="card-body p-4 p-md-5">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 border-bottom pb-3 mb-4">
+      <div><h1 class="h2 mb-1">Invoice</h1><div class="text-muted">{{ invoice.invoice_number }}</div></div>
+      <span class="badge text-bg-{% if invoice.status == 'paid' %}success{% elif invoice.status == 'void' %}secondary{% else %}warning{% endif %} fs-6">{{ invoice.get_status_display }}</span>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col-sm-7"><div class="text-muted small">BILL TO</div><strong>{{ invoice.company.name }}</strong><br>{{ invoice.company.email }}</div>
+      <div class="col-sm-5 mt-3 mt-sm-0"><div><span class="text-muted">Billing month:</span> {{ invoice.period_start|date:"F Y" }}</div><div><span class="text-muted">Due date:</span> {{ invoice.due_date|date:"M j, Y" }}</div><div><span class="text-muted">Created:</span> {{ invoice.created_at|date:"M j, Y" }}</div></div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table">
+        <thead><tr><th>Description</th><th class="text-end">Quantity</th><th class="text-end">Rate</th><th class="text-end">Amount</th></tr></thead>
+        <tbody>
+          <tr><td>Fleet management — active trucks</td><td class="text-end">{{ invoice.truck_count }}</td><td class="text-end">${{ invoice.truck_rate|floatformat:2 }}</td><td class="text-end">${{ invoice.truck_amount|floatformat:2 }}</td></tr>
+          <tr><td>Trailer management</td><td class="text-end">{{ invoice.trailer_count }}</td><td class="text-end">${{ invoice.trailer_rate|floatformat:2 }}</td><td class="text-end">${{ invoice.trailer_amount|floatformat:2 }}</td></tr>
+        </tbody>
+        <tfoot><tr><th colspan="3" class="text-end">Total due</th><th class="text-end fs-5">${{ invoice.total|floatformat:2 }}</th></tr></tfoot>
+      </table>
+    </div>
+    <p class="small text-muted mt-4">Payment instructions: contact G-Fleet-IQ to arrange payment. This invoice is not paid through the app yet.</p>
+
+    {% if can_manage_invoices and invoice.status == "issued" %}
+    <form method="post" class="mt-4 no-print">
+      {% csrf_token %}<input type="hidden" name="action" value="mark_paid">
+      <button class="btn btn-success" type="submit">Mark as paid</button>
+    </form>
+    {% endif %}
+  </div>
+</article>
+
+<style>@media print { nav, footer, .no-print, .alert { display: none !important; } body { background: white !important; } .container { max-width: none !important; margin: 0 !important; padding: 0 !important; } .card { border: 0 !important; box-shadow: none !important; } }</style>
+{% endblock %}

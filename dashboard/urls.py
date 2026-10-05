@@ -6,6 +6,8 @@ urlpatterns = [
    
     path("dashboard/", views.home, name="home"),
     path("driver-logs/", views.driver_logs, name="driver_logs"),
+    path("billing/", views.billing, name="billing"),
+    path("billing/<int:invoice_id>/", views.invoice_detail, name="invoice_detail"),
     path("integrations/samsara/", views.samsara_integration, name="samsara_integration"),
     path("integrations/samsara/connect/", views.samsara_connect, name="samsara_connect"),
     path("integrations/samsara/callback/", views.samsara_callback, name="samsara_callback"),

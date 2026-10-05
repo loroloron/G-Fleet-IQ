@@ -84,6 +84,63 @@ class Company(models.Model):
         return self.name
 
 
+class CompanyInvoice(models.Model):
+    STATUS_ISSUED = "issued"
+    STATUS_PAID = "paid"
+    STATUS_VOID = "void"
+    STATUS_CHOICES = [
+        (STATUS_ISSUED, _("Issued")),
+        (STATUS_PAID, _("Paid")),
+        (STATUS_VOID, _("Void")),
+    ]
+
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="invoices")
+    period_start = models.DateField()
+    period_end = models.DateField()
+    due_date = models.DateField()
+    truck_count = models.PositiveIntegerField(default=0)
+    trailer_count = models.PositiveIntegerField(default=0)
+    truck_rate = models.DecimalField(max_digits=8, decimal_places=2, default="30.00")
+    trailer_rate = models.DecimalField(max_digits=8, decimal_places=2, default="15.00")
+    status = models.CharField(max_length=12, choices=STATUS_CHOICES, default=STATUS_ISSUED)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="company_invoices_created",
+    )
+
+    class Meta:
+        ordering = ["-period_start", "company__name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["company", "period_start", "period_end"],
+                name="unique_company_invoice_period",
+            )
+        ]
+
+    @property
+    def total(self):
+        return self.truck_amount + self.trailer_amount
+
+    @property
+    def truck_amount(self):
+        return self.truck_count * self.truck_rate
+
+    @property
+    def trailer_amount(self):
+        return self.trailer_count * self.trailer_rate
+
+    @property
+    def invoice_number(self):
+        return f"GFI-{self.period_start:%Y%m}-{self.pk:06d}"
+
+    def __str__(self):
+        return f"{self.invoice_number} — {self.company.name}"
+
+
 class CompanyMembership(models.Model):
     ROLE_CLIENT_ADMIN = "client_admin"
     ROLE_DISPATCHER = "dispatcher"
