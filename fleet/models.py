@@ -1,4 +1,5 @@
 from django.db import models
+from decimal import Decimal
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
@@ -100,8 +101,8 @@ class CompanyInvoice(models.Model):
     due_date = models.DateField()
     truck_count = models.PositiveIntegerField(default=0)
     trailer_count = models.PositiveIntegerField(default=0)
-    truck_rate = models.DecimalField(max_digits=8, decimal_places=2, default="30.00")
-    trailer_rate = models.DecimalField(max_digits=8, decimal_places=2, default="15.00")
+    truck_rate = models.DecimalField(max_digits=8, decimal_places=2, default=Decimal("30.00"))
+    trailer_rate = models.DecimalField(max_digits=8, decimal_places=2, default=Decimal("15.00"))
     status = models.CharField(max_length=12, choices=STATUS_CHOICES, default=STATUS_ISSUED)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(
@@ -110,6 +111,14 @@ class CompanyInvoice(models.Model):
         blank=True,
         on_delete=models.SET_NULL,
         related_name="company_invoices_created",
+    )
+    paid_at = models.DateTimeField(null=True, blank=True)
+    paid_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="company_invoices_paid",
     )
 
     class Meta:
@@ -124,6 +133,10 @@ class CompanyInvoice(models.Model):
     @property
     def total(self):
         return self.truck_amount + self.trailer_amount
+
+    @property
+    def amount_due(self):
+        return self.total if self.status == self.STATUS_ISSUED else Decimal("0.00")
 
     @property
     def truck_amount(self):

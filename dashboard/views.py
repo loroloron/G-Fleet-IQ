@@ -200,7 +200,12 @@ def billing(request):
     if request.method == "POST":
         if not request.is_account_admin:
             return HttpResponseForbidden("Only a G-Fleet-IQ account administrator can create invoices.")
-        company = get_object_or_404(companies, pk=request.POST.get("company_id"))
+        try:
+            company_id = int(request.POST.get("company_id", ""))
+        except (TypeError, ValueError):
+            messages.error(request, "Choose a valid customer company before creating an invoice.")
+            return redirect("billing")
+        company = get_object_or_404(companies, pk=company_id)
         today = timezone.localdate()
         period_start = today.replace(day=1)
         period_end = today.replace(day=calendar.monthrange(today.year, today.month)[1])
@@ -240,10 +245,16 @@ def invoice_detail(request, invoice_id):
         if not request.is_account_admin:
             return HttpResponseForbidden("Only a G-Fleet-IQ account administrator can update invoice status.")
         action = request.POST.get("action")
-        if action == "mark_paid" and invoice.status == CompanyInvoice.STATUS_ISSUED:
-            invoice.status = CompanyInvoice.STATUS_PAID
-            invoice.save(update_fields=["status"])
-            messages.success(request, "Invoice marked as paid.")
+        if action == "mark_paid":
+            updated = invoices.filter(pk=invoice.pk, status=CompanyInvoice.STATUS_ISSUED).update(
+                status=CompanyInvoice.STATUS_PAID,
+                paid_at=timezone.now(),
+                paid_by=request.user,
+            )
+            if updated:
+                messages.success(request, "Invoice marked as paid.")
+            else:
+                messages.info(request, "This invoice is already paid or void; its payment record was not changed.")
         return redirect("invoice_detail", invoice_id=invoice.pk)
 
     return render(request, "dashboard/invoice_detail.html", {

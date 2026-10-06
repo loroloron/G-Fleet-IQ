@@ -9,7 +9,7 @@
 <article class="card shadow-sm mx-auto" style="max-width: 850px;">
   <div class="card-body p-4 p-md-5">
     <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 border-bottom pb-3 mb-4">
-      <div><h1 class="h2 mb-1">Invoice</h1><div class="text-muted">{{ invoice.invoice_number }}</div></div>
+      <div><div class="fw-bold mb-2">G Fleet IQ</div><h1 class="h2 mb-1">Invoice</h1><div class="text-muted">{{ invoice.invoice_number }}</div></div>
       <span class="badge text-bg-{% if invoice.status == 'paid' %}success{% elif invoice.status == 'void' %}secondary{% else %}warning{% endif %} fs-6">{{ invoice.get_status_display }}</span>
     </div>
 
@@ -25,15 +25,25 @@
           <tr><td>Fleet management — active trucks</td><td class="text-end">{{ invoice.truck_count }}</td><td class="text-end">${{ invoice.truck_rate|floatformat:2 }}</td><td class="text-end">${{ invoice.truck_amount|floatformat:2 }}</td></tr>
           <tr><td>Trailer management</td><td class="text-end">{{ invoice.trailer_count }}</td><td class="text-end">${{ invoice.trailer_rate|floatformat:2 }}</td><td class="text-end">${{ invoice.trailer_amount|floatformat:2 }}</td></tr>
         </tbody>
-        <tfoot><tr><th colspan="3" class="text-end">Total due</th><th class="text-end fs-5">${{ invoice.total|floatformat:2 }}</th></tr></tfoot>
+        <tfoot>
+          <tr><th colspan="3" class="text-end">Invoice total</th><th class="text-end">${{ invoice.total|floatformat:2 }}</th></tr>
+          <tr><th colspan="3" class="text-end">Amount due</th><th class="text-end fs-5">${{ invoice.amount_due|floatformat:2 }}</th></tr>
+        </tfoot>
       </table>
     </div>
+    {% if invoice.status == "issued" %}
     <p class="small text-muted mt-4">Payment instructions: contact G-Fleet-IQ to arrange payment. This invoice is not paid through the app yet.</p>
+    {% elif invoice.status == "paid" %}
+    <p class="text-success mt-4">Payment received.{% if invoice.paid_at %} Recorded {{ invoice.paid_at|date:"M j, Y, g:i A" }}.{% endif %}</p>
+    {% else %}
+    <p class="text-muted mt-4">This invoice is void. No payment is due.</p>
+    {% endif %}
 
     {% if can_manage_invoices and invoice.status == "issued" %}
     <form method="post" class="mt-4 no-print">
       {% csrf_token %}<input type="hidden" name="action" value="mark_paid">
-      <button class="btn btn-success" type="submit">Mark as paid</button>
+      <p class="small text-muted">Record payment only after you have received the full invoice amount.</p>
+      <button class="btn btn-success" type="submit">Record full payment received</button>
     </form>
     {% endif %}
   </div>
