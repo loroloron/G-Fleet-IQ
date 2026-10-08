@@ -29,6 +29,8 @@ from fleet.models import (
     CompanyInvoice,
 )
 
+from .payments import configured as payment_configured
+
 from .samsara import (
     SamsaraError,
     authorization_url as samsara_authorization_url,
@@ -246,11 +248,16 @@ def invoice_detail(request, invoice_id):
             return HttpResponseForbidden("Only a G-Fleet-IQ account administrator can update invoice status.")
         action = request.POST.get("action")
         if action == "mark_paid":
-            updated = invoices.filter(pk=invoice.pk, status=CompanyInvoice.STATUS_ISSUED).update(
-                status=CompanyInvoice.STATUS_PAID,
-                paid_at=timezone.now(),
-                paid_by=request.user,
-            )
+            with transaction.atomic():
+                locked = CompanyInvoice.objects.select_for_update().get(pk=invoice.pk)
+                if locked.payments.filter(status__in=["pending", "review"]).exists():
+                    messages.error(request, "Resolve the open checkout before recording a manual payment.")
+                    return redirect("invoice_detail", invoice_id=invoice.pk)
+                updated = invoices.filter(pk=invoice.pk, status=CompanyInvoice.STATUS_ISSUED).update(
+                    status=CompanyInvoice.STATUS_PAID,
+                    paid_at=timezone.now(),
+                    paid_by=request.user,
+                )
             if updated:
                 messages.success(request, "Invoice marked as paid.")
             else:
@@ -260,6 +267,14 @@ def invoice_detail(request, invoice_id):
     return render(request, "dashboard/invoice_detail.html", {
         "invoice": invoice,
         "can_manage_invoices": request.is_account_admin,
+        "can_pay_invoice": request.is_account_admin or any(
+            m.company_id == invoice.company_id and m.role == CompanyMembership.ROLE_CLIENT_ADMIN
+            for m in request.company_memberships),
+        "stripe_available": payment_configured("stripe"),
+        "paypal_available": payment_configured("paypal"),
+        "pending_payment": invoice.payments.filter(status="pending").first(),
+        "review_payment": invoice.payments.filter(status="review").first(),
+        "confirmed_payment": invoice.payments.filter(status="succeeded").first(),
     })
 
 
