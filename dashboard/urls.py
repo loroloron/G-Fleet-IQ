@@ -1,7 +1,12 @@
 from django.urls import path
-from . import views
+from . import views, payment_views
 
 urlpatterns = [
+    path("billing/<int:invoice_id>/pay/<str:provider>/", payment_views.payment_start, name="payment_start"),
+    path("billing/payments/<uuid:payment_id>/return/", payment_views.payment_return, name="payment_return"),
+    path("billing/payments/<uuid:payment_id>/cancel/", payment_views.payment_cancel, name="payment_cancel"),
+    path("billing/webhooks/stripe/", payment_views.stripe_webhook, name="stripe_webhook"),
+    path("billing/webhooks/paypal/", payment_views.paypal_webhook, name="paypal_webhook"),
     path("", views.landing, name="landing"),
    
     path("dashboard/", views.home, name="home"),

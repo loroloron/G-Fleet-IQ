@@ -71,8 +71,17 @@ REST_FRAMEWORK = {
     },
 }
 
-# Samsara OAuth values are configured in the deployment environment, never in
-# source control. Each G-Fleet-IQ customer authorizes their own Samsara org.
+# Invoice payments use hosted provider pages; card details never enter Django.
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
+STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
+PAYPAL_CLIENT_ID = os.environ.get("PAYPAL_CLIENT_ID", "")
+PAYPAL_CLIENT_SECRET = os.environ.get("PAYPAL_CLIENT_SECRET", "")
+PAYPAL_WEBHOOK_ID = os.environ.get("PAYPAL_WEBHOOK_ID", "")
+PAYPAL_MODE = os.environ.get("PAYPAL_MODE", "live")
+PAYMENT_BASE_URL = os.environ.get("PAYMENT_BASE_URL", os.environ.get(
+    "RENDER_EXTERNAL_URL", "http://localhost:8000"))
+
+# Samsara credentials also stay in the deployment environment.
 SAMSARA_CLIENT_ID = os.environ.get("SAMSARA_CLIENT_ID", "")
 SAMSARA_CLIENT_SECRET = os.environ.get("SAMSARA_CLIENT_SECRET", "")
 SAMSARA_REDIRECT_URI = os.environ.get("SAMSARA_REDIRECT_URI", "")

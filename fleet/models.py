@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from decimal import Decimal
 from django.conf import settings
@@ -152,6 +153,29 @@ class CompanyInvoice(models.Model):
 
     def __str__(self):
         return f"{self.invoice_number} — {self.company.name}"
+
+
+class InvoicePayment(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    invoice = models.ForeignKey(CompanyInvoice, on_delete=models.PROTECT, related_name="payments")
+    provider = models.CharField(max_length=10, choices=[("stripe", "Stripe"), ("paypal", "PayPal")])
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    status = models.CharField(max_length=12, default="pending", choices=[
+        ("pending", "Pending"), ("succeeded", "Succeeded"), ("cancelled", "Cancelled"), ("review", "Needs review")])
+    external_id = models.CharField(max_length=255, blank=True)
+    checkout_url = models.URLField(max_length=2048, blank=True)
+    reference = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["invoice"], condition=models.Q(status="pending"),
+                                    name="one_pending_payment_per_invoice"),
+            models.UniqueConstraint(fields=["provider", "external_id"], condition=~models.Q(external_id=""),
+                                    name="unique_provider_checkout"),
+        ]
 
 
 class CompanyMembership(models.Model):

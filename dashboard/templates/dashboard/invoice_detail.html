@@ -32,14 +32,31 @@
       </table>
     </div>
     {% if invoice.status == "issued" %}
-    <p class="small text-muted mt-4">Payment instructions: contact G-Fleet-IQ to arrange payment. This invoice is not paid through the app yet.</p>
+    {% if review_payment %}
+    <p class="text-warning">Payment received and awaiting review. Do not pay again; contact G Fleet IQ.</p>
+    {% elif can_pay_invoice %}
+    {% if pending_payment %}
+    <div class="mt-4 no-print">
+      <p>A {{ pending_payment.get_provider_display }} checkout is open for this invoice.</p>
+      <form method="post" action="{% url 'payment_start' invoice.pk pending_payment.provider %}">{% csrf_token %}<button class="btn btn-primary">Resume checkout</button></form>
+      <a class="d-inline-block mt-2" href="{% url 'payment_cancel' pending_payment.pk %}">Close checkout / choose another method</a>
+    </div>
+    {% else %}
+    <div class="d-flex flex-wrap gap-2 mt-4 no-print">
+      {% if stripe_available %}<form method="post" action="{% url 'payment_start' invoice.pk 'stripe' %}">{% csrf_token %}<button class="btn btn-primary">Pay by card (Stripe)</button></form>{% endif %}
+      {% if paypal_available %}<form method="post" action="{% url 'payment_start' invoice.pk 'paypal' %}">{% csrf_token %}<button class="btn btn-outline-primary">Pay with PayPal</button></form>{% endif %}
+    </div>
+    {% if stripe_available or paypal_available %}<p class="small text-muted mt-2">Pay the full invoice securely. This is a one-time payment; it does not enable automatic monthly charges.</p>{% else %}<p class="small text-muted mt-4">Online payments are being set up. Contact G Fleet IQ to arrange payment.</p>{% endif %}
+    {% endif %}
+    {% else %}<p class="small text-muted mt-4">Your company administrator can pay this invoice.</p>{% endif %}
     {% elif invoice.status == "paid" %}
     <p class="text-success mt-4">Payment received.{% if invoice.paid_at %} Recorded {{ invoice.paid_at|date:"M j, Y, g:i A" }}.{% endif %}</p>
     {% else %}
     <p class="text-muted mt-4">This invoice is void. No payment is due.</p>
     {% endif %}
 
-    {% if can_manage_invoices and invoice.status == "issued" %}
+    {% if confirmed_payment %}<p class="small text-muted">Paid through {{ confirmed_payment.get_provider_display }}. Reference: {{ confirmed_payment.reference }}</p>{% endif %}
+    {% if can_manage_invoices and invoice.status == "issued" and not pending_payment and not review_payment %}
     <form method="post" class="mt-4 no-print">
       {% csrf_token %}<input type="hidden" name="action" value="mark_paid">
       <p class="small text-muted">Record payment only after you have received the full invoice amount.</p>

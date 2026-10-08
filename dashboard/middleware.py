@@ -8,7 +8,7 @@ from fleet.models import AccountMembership, Company, CompanyMembership
 class RequireLoginMiddleware:
     """Require a signed-in user for fleet pages while keeping entry points public."""
 
-    PUBLIC_URLS = {"landing", "login", "logout", "sign_up", "set_language", "service_worker"}
+    PUBLIC_URLS = {"landing", "login", "logout", "sign_up", "set_language", "service_worker", "stripe_webhook", "paypal_webhook"}
     OWNER_ONLY_URLS = {"account_team"}
     ADMIN_MANAGEMENT_URLS = {"companies", "edit_company"}
     VIEWER_BLOCKED_URLS = {"assign_load", "plan_all_loads", "dispatch_recommended_load"}
