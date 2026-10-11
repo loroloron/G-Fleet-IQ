@@ -19,7 +19,10 @@
                     </div>
                     <div class="mb-3">
                         <label for="id_password" class="form-label">{% translate "Password" %}</label>
-                        <input type="password" name="password" id="id_password" class="form-control" autocomplete="current-password" required>
+                        <div class="input-group">
+                            <input type="password" name="password" id="id_password" class="form-control" autocomplete="current-password" required>
+                            <button type="button" class="btn btn-outline-secondary" data-password-toggle="id_password" data-show-label="{% translate 'Show' %}" data-hide-label="{% translate 'Hide' %}" aria-controls="id_password" aria-pressed="false">{% translate "Show" %}</button>
+                        </div>
                         {{ form.password.errors }}
                     </div>
                     <button type="submit" class="btn btn-primary w-100">{% translate "Log in" %}</button>
@@ -29,4 +32,16 @@
         </div>
     </div>
 </div>
+
+<script>
+document.querySelectorAll("[data-password-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+        const input = document.getElementById(button.dataset.passwordToggle);
+        const visible = input.type === "password";
+        input.type = visible ? "text" : "password";
+        button.textContent = visible ? button.dataset.hideLabel : button.dataset.showLabel;
+        button.setAttribute("aria-pressed", String(visible));
+    });
+});
+</script>
 {% endblock %}
