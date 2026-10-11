@@ -1,6 +1,7 @@
 """Server-side invoice checkout; credentials are read only from deployment settings."""
 import base64
 import json
+import logging
 from decimal import Decimal, InvalidOperation
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlparse
@@ -15,6 +16,7 @@ from fleet.models import CompanyInvoice, InvoicePayment
 
 
 stripe.default_http_client = stripe.RequestsClient(timeout=15)
+logger = logging.getLogger(__name__)
 
 
 class PaymentError(Exception):
@@ -35,7 +37,14 @@ def stripe_call(operation, *args, **kwargs):
         result = operation(*args, api_key=settings.STRIPE_SECRET_KEY, **kwargs)
         return result.to_dict() if isinstance(result, stripe.StripeObject) else result
     except stripe.StripeError as exc:
-        # Provider responses can contain sensitive details; never show them to users.
+        # Log only the exception category and status, never provider messages,
+        # response bodies, request parameters, or credentials.
+        logger.warning("Stripe request failed: category=%s status=%s",
+                       type(exc).__name__, exc.http_status)
+        if isinstance(exc, stripe.AuthenticationError):
+            raise PaymentError("Stripe rejected the configured API key. Please contact your billing administrator.") from exc
+        if isinstance(exc, stripe.PermissionError):
+            raise PaymentError("The Stripe API key does not allow this payment request. Please contact your billing administrator.") from exc
         raise PaymentError("Stripe could not complete this request. Please try again.") from exc
 
 
