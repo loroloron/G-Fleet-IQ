@@ -119,3 +119,38 @@ class BillingTests(TestCase):
         response = self.client.get(reverse("billing"))
         self.assertEqual(response.status_code, 302)
         self.assertIn("/login/", response.url)
+
+
+@override_settings(STORAGES={
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+})
+class SignUpTests(TestCase):
+    def test_signup_accepts_ten_character_username(self):
+        response = self.client.post(reverse("sign_up"), {
+            "username": "fleettest1",
+            "password1": "Strong-Sandbox-Password-2026!",
+            "password2": "Strong-Sandbox-Password-2026!",
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(get_user_model().objects.filter(username="fleettest1").exists())
+
+    def test_signup_rejects_username_over_ten_characters(self):
+        response = self.client.post(reverse("sign_up"), {
+            "username": "fleettest12",
+            "password1": "Strong-Sandbox-Password-2026!",
+            "password2": "Strong-Sandbox-Password-2026!",
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("username", response.context["form"].errors)
+        self.assertFalse(get_user_model().objects.filter(username="fleettest12").exists())
+
+    def test_existing_long_username_can_still_log_in(self):
+        get_user_model().objects.create_user(
+            username="existing-long-username", password="Strong-Sandbox-Password-2026!")
+        response = self.client.post(reverse("login"), {
+            "username": "existing-long-username",
+            "password": "Strong-Sandbox-Password-2026!",
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("_auth_user_id", self.client.session)

@@ -14,7 +14,14 @@
                     {% for field in form %}
                     <div class="mb-3">
                         <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                        {% if field.field.widget.input_type == "password" %}
+                        <div class="input-group">
+                            {{ field }}
+                            <button type="button" class="btn btn-outline-secondary" data-password-toggle="{{ field.id_for_label }}" data-show-label="{% translate 'Show' %}" data-hide-label="{% translate 'Hide' %}" aria-controls="{{ field.id_for_label }}" aria-pressed="false">{% translate "Show" %}</button>
+                        </div>
+                        {% else %}
                         {{ field }}
+                        {% endif %}
                         {% if field.help_text %}<div class="form-text">{{ field.help_text|safe }}</div>{% endif %}
                         {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
                     </div>
@@ -26,4 +33,16 @@
         </div>
     </div>
 </div>
+
+<script>
+document.querySelectorAll("[data-password-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+        const input = document.getElementById(button.dataset.passwordToggle);
+        const visible = input.type === "password";
+        input.type = visible ? "text" : "password";
+        button.textContent = visible ? button.dataset.hideLabel : button.dataset.showLabel;
+        button.setAttribute("aria-pressed", String(visible));
+    });
+});
+</script>
 {% endblock %}

@@ -8,7 +8,7 @@ from django.http import HttpResponseForbidden
 from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth import login
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, UsernameField
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Avg, Sum, Q
@@ -278,10 +278,18 @@ def invoice_detail(request, invoice_id):
     })
 
 
+class SignUpForm(UserCreationForm):
+    username = UsernameField(
+        max_length=10,
+        label="Username",
+        help_text="Choose a username with 1–10 characters. Letters, digits and @/./+/-/_ are allowed.",
+    )
+
+
 def sign_up(request):
     if request.user.is_authenticated:
         return redirect("home")
-    form = UserCreationForm(request.POST or None)
+    form = SignUpForm(request.POST or None)
     for field in form.fields.values():
         field.widget.attrs["class"] = "form-control"
     if request.method == "POST" and form.is_valid():
