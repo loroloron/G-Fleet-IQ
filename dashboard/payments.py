@@ -90,7 +90,7 @@ def create_checkout(payment):
     # Every retry for this attempt uses the same provider idempotency key and data.
     if payment.provider == "stripe":
         session = stripe_call(
-            stripe.checkout.Session.create, mode="payment", payment_method_types=["card"],
+            stripe.checkout.Session.create, mode="payment",
             client_reference_id=str(payment.invoice_id), metadata={"payment_id": str(payment.pk)},
             line_items=[{"price_data": {"currency": "usd", "unit_amount": int(payment.amount * 100),
                          "product_data": {"name": payment.invoice.invoice_number}}, "quantity": 1}],
