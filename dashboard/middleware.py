@@ -63,9 +63,8 @@ class RequireLoginMiddleware:
             if item.role in {CompanyMembership.ROLE_CLIENT_ADMIN, CompanyMembership.ROLE_DISPATCHER}
         }
 
-        # Users without a membership must be able to submit account_setup to
-        # claim the first-owner role; otherwise this middleware redirects the
-        # setup POST back to the same page before the view can process it.
+        # Existing users without memberships can create their own workspace.
+        # Let the setup view handle its POST instead of redirecting it to itself.
         if match and match.url_name == "account_setup":
             return None
 

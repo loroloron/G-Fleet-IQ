@@ -4,6 +4,7 @@ import secrets
 import hmac
 
 from django.shortcuts import render, redirect, get_object_or_404
+from django import forms
 from django.http import HttpResponseForbidden
 from django.urls import reverse
 from django.contrib import messages
@@ -279,11 +280,33 @@ def invoice_detail(request, invoice_id):
 
 
 class SignUpForm(UserCreationForm):
+    company_name = forms.CharField(max_length=200, label="Company name")
     username = UsernameField(
         max_length=10,
         label="Username",
-        help_text="Choose a username with 1–10 characters. Letters, digits and @/./+/-/_ are allowed.",
+        help_text="Choose a username with 1–10 characters. Letters, digits and @ . + - _ are allowed.",
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.order_fields(["company_name", "username", "password1", "password2"])
+
+
+class WorkspaceSetupForm(forms.Form):
+    company_name = forms.CharField(
+        max_length=200, label="Company name",
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+    )
+
+
+def _create_customer_workspace(user, company_name):
+    """Called inside a transaction so signup never leaves a partial workspace."""
+    account = FleetAccount.objects.create(name=company_name)
+    Company.objects.create(account=account, name=company_name)
+    AccountMembership.objects.create(
+        user=user, account=account, role=AccountMembership.ROLE_OWNER,
+    )
+    return account
 
 
 def sign_up(request):
@@ -293,40 +316,35 @@ def sign_up(request):
     for field in form.fields.values():
         field.widget.attrs["class"] = "form-control"
     if request.method == "POST" and form.is_valid():
-        user = form.save()
+        with transaction.atomic():
+            user = form.save()
+            _create_customer_workspace(user, form.cleaned_data["company_name"])
         login(request, user)
-        messages.success(request, "Your account is ready. Welcome to G Fleet IQ!")
+        messages.success(request, "Your private workspace is ready. Welcome to G Fleet IQ!")
         return redirect("home")
     return render(request, "registration/signup.html", {"form": form})
 
 
 def account_setup(request):
-    account = FleetAccount.objects.order_by("id").first()
-    if account is None:
-        account = FleetAccount.objects.create(name="G Fleet IQ Account")
-    if AccountMembership.objects.filter(user=request.user, active=True).exists():
+    if (AccountMembership.objects.filter(user=request.user, active=True).exists()
+            or CompanyMembership.objects.filter(user=request.user, active=True).exists()):
         return redirect("home")
-
-    if request.method == "POST":
+    if (AccountMembership.objects.filter(user=request.user).exists()
+            or CompanyMembership.objects.filter(user=request.user).exists()):
+        return HttpResponseForbidden("Your access is inactive. Contact your account owner.")
+    form = WorkspaceSetupForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
         with transaction.atomic():
-            account = FleetAccount.objects.select_for_update().get(pk=account.pk)
-            owner_exists = AccountMembership.objects.filter(
-                account=account,
-                active=True,
-                role=AccountMembership.ROLE_OWNER,
-            ).exists()
-            if owner_exists:
-                messages.info(request, "Ask your G Fleet IQ account owner to add your username to the team.")
-            else:
-                AccountMembership.objects.create(
-                    user=request.user,
-                    account=account,
-                    role=AccountMembership.ROLE_OWNER,
-                )
-                messages.success(request, "Your G Fleet IQ account is set up. You are the account owner.")
+            user = get_user_model().objects.select_for_update().get(pk=request.user.pk)
+            # Serialize repeated setup submissions without granting access to
+            # another customer's account or reactivating a revoked membership.
+            if (AccountMembership.objects.filter(user=user).exists()
+                    or CompanyMembership.objects.filter(user=user).exists()):
                 return redirect("home")
-
-    return render(request, "registration/account_setup.html", {"account": account})
+            _create_customer_workspace(user, form.cleaned_data["company_name"])
+        messages.success(request, "Your private workspace is ready. You are the account owner.")
+        return redirect("home")
+    return render(request, "registration/account_setup.html", {"form": form})
 
 
 def account_team(request):
@@ -360,6 +378,8 @@ def account_team(request):
         teammate = User.objects.filter(username__iexact=username).first()
         if not teammate:
             messages.error(request, "That username is not registered yet. Ask them to create an account first.")
+        elif AccountMembership.objects.filter(user=teammate).exclude(account=request.account).exists():
+            messages.error(request, "That user already belongs to another private workspace.")
         elif AccountMembership.objects.filter(
             account=request.account,
             active=True,
