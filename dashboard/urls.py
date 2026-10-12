@@ -1,14 +1,16 @@
 from django.urls import path
 from . import views, payment_views
+from .analytics import owner_analytics
 
 urlpatterns = [
+    path("owner/analytics/", owner_analytics, name="owner_analytics"),
     path("billing/<int:invoice_id>/pay/<str:provider>/", payment_views.payment_start, name="payment_start"),
     path("billing/payments/<uuid:payment_id>/return/", payment_views.payment_return, name="payment_return"),
     path("billing/payments/<uuid:payment_id>/cancel/", payment_views.payment_cancel, name="payment_cancel"),
     path("billing/webhooks/stripe/", payment_views.stripe_webhook, name="stripe_webhook"),
     path("billing/webhooks/paypal/", payment_views.paypal_webhook, name="paypal_webhook"),
     path("", views.landing, name="landing"),
-   
+
     path("dashboard/", views.home, name="home"),
     path("driver-logs/", views.driver_logs, name="driver_logs"),
     path("billing/", views.billing, name="billing"),
@@ -32,7 +34,7 @@ urlpatterns = [
 ),
     path("trucks/<int:truck_id>/edit/", views.edit_truck, name="edit_truck"),
     path("trucks/add/", views.add_truck, name="add_truck"),
-   path("drivers/add/", views.add_driver, name="add_driver"), 
+   path("drivers/add/", views.add_driver, name="add_driver"),
    path("trucks/add/", views.add_truck, name="add_truck"),
    path("trailers/add/", views.add_trailer, name="add_trailer"),
    path("trailers/<int:trailer_id>/edit/", views.edit_trailer, name="edit_trailer"),

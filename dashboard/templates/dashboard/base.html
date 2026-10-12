@@ -109,6 +109,9 @@
                     {% endif %}
                 {% endfor %}
                 <span class="navbar-text text-light ms-lg-2">{{ user.username }}</span>
+                {% if request.can_view_analytics %}
+                <a class="nav-link" href="{% url 'owner_analytics' %}">App analytics</a>
+                {% endif %}
                 <form action="{% url 'logout' %}" method="post" class="d-inline ms-lg-2 my-2 my-lg-0">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-outline-light btn-sm">{% translate "Log out" %}</button>

@@ -100,6 +100,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
 
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'dashboard.analytics.VisitTrackingMiddleware',
     'dashboard.middleware.RequireLoginMiddleware',
 
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -109,6 +110,10 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'gfleetiq.urls'
 
 LOGIN_URL = "/login/"
+PLATFORM_ANALYTICS_USERS = dict(
+    item.split(":", 1) for item in os.environ.get("PLATFORM_ANALYTICS_USERS", "").split(",")
+    if ":" in item
+)
 LOGIN_REDIRECT_URL = "/dashboard/"
 LOGOUT_REDIRECT_URL = "/"
 
