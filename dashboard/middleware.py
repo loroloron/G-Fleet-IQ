@@ -33,6 +33,11 @@ class RequireLoginMiddleware:
         if not request.user.is_authenticated:
             return redirect_to_login(request.get_full_path(), settings.LOGIN_URL)
 
+        if match and match.url_name == "owner_analytics":
+            # The analytics view checks platform superuser access independently
+            # of customer workspace membership.
+            return None
+
         account_membership = (
             AccountMembership.objects.filter(user=request.user, active=True)
             .select_related("account")
