@@ -7,6 +7,13 @@ from django.utils.translation import gettext_lazy as _
 class FleetAccount(models.Model):
     name = models.CharField(max_length=200, default="G Fleet IQ Account")
     created_at = models.DateTimeField(auto_now_add=True)
+    trial_started_at = models.DateTimeField(null=True, blank=True)
+    trial_ends_at = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def trial_expired(self):
+        from django.utils import timezone
+        return self.trial_ends_at is not None and timezone.now() >= self.trial_ends_at
 
     def __str__(self):
         return self.name

@@ -8,6 +8,7 @@
             <div class="card-body p-4">
                 <h1 class="h3 mb-3">{% translate "Create your G Fleet IQ account" %}</h1>
                 <p class="text-muted">{% translate "Create your company’s private workspace. You can start immediately without waiting for approval." %}</p>
+                <div class="alert alert-info"><strong>14-day free trial.</strong> Starts when your workspace is created. No card required. No automatic charge. External load-board subscriptions are separate.</div>
                 <form method="post">
                     {% csrf_token %}
                     {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}

@@ -301,7 +301,11 @@ class WorkspaceSetupForm(forms.Form):
 
 def _create_customer_workspace(user, company_name):
     """Called inside a transaction so signup never leaves a partial workspace."""
-    account = FleetAccount.objects.create(name=company_name)
+    started_at = timezone.now()
+    account = FleetAccount.objects.create(
+        name=company_name, trial_started_at=started_at,
+        trial_ends_at=started_at + timedelta(days=14),
+    )
     Company.objects.create(account=account, name=company_name)
     AccountMembership.objects.create(
         user=user, account=account, role=AccountMembership.ROLE_OWNER,
@@ -320,7 +324,7 @@ def sign_up(request):
             user = form.save()
             _create_customer_workspace(user, form.cleaned_data["company_name"])
         login(request, user)
-        messages.success(request, "Your private workspace is ready. Welcome to G Fleet IQ!")
+        messages.success(request, "Your 14-day free trial has started. No card required and no automatic charge.")
         return redirect("home")
     return render(request, "registration/signup.html", {"form": form})
 

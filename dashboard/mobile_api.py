@@ -7,7 +7,8 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import status
-from rest_framework.authentication import TokenAuthentication
+from rest_framework.authentication import TokenAuthentication as BaseTokenAuthentication
+from .trial_access import TrialTokenAuthentication as TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -143,7 +144,7 @@ class MobileLoginView(APIView):
 
 
 class MobileLogoutView(APIView):
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [BaseTokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request):

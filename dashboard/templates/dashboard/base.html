@@ -157,6 +157,10 @@
         {% endfor %}
     {% endif %}
 
+    {% if request.account.trial_ends_at %}
+    <div class="alert alert-info" role="status">Your 14-day free trial ends {{ request.account.trial_ends_at|date:"M j, Y, g:i A T" }}. No automatic charge.</div>
+    {% endif %}
+
     {% block content %}
     {% endblock %}
 

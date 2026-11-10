@@ -11,7 +11,7 @@ class CompanyInvoiceAdmin(admin.ModelAdmin):
 
 @admin.register(FleetAccount)
 class FleetAccountAdmin(admin.ModelAdmin):
-    list_display = ("name", "created_at")
+    list_display = ("name", "created_at", "trial_started_at", "trial_ends_at")
     search_fields = ("name",)
 
 

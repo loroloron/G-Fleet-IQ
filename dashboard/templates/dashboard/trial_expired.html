@@ -1,0 +1,9 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+<div class="card card-body mx-auto" style="max-width: 650px">
+<h1 class="h3">Your free trial has ended</h1>
+<p>Your company’s 14-day G Fleet IQ trial ended on {{ request.account.trial_ends_at|date:"M j, Y, g:i A T" }}.</p>
+<p>No automatic charge was made. Your workspace data has been kept. Contact G Fleet IQ to arrange continued access.</p>
+<form action="{% url 'logout' %}" method="post">{% csrf_token %}<button type="submit" class="btn btn-outline-secondary">Log out</button></form>
+</div>
+{% endblock %}

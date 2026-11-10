@@ -79,6 +79,10 @@ class RequireLoginMiddleware:
         if not request.is_account_admin and not client_memberships:
             return redirect("account_setup")
 
+        if request.account.trial_expired:
+            from django.shortcuts import render
+            return render(request, "dashboard/trial_expired.html", status=403)
+
         role = account_membership.role if account_membership else None
         if not request.is_account_admin and request.method == "POST" and not request.write_company_ids:
             return HttpResponseForbidden("This client account has read-only access.")
