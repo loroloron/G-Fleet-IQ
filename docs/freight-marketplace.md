@@ -33,3 +33,7 @@ Confirm search rights, per-customer entitlements, authentication, data retention
 Nine tests cover cross-account marketplace visibility, private load isolation, role permissions, forged ownership/company fields, publishing consent, date/weight/rate validation, closed/expired access, search filters, authentication, and CSRF.
 
 Local validation used Python 3.12 and Django 5.2; repeat on the repository's pinned Python/Django 6 deployment runtime before release. Existing model primary-key warnings are unrelated to this feature.
+
+## Load Sources directory
+
+`/load-sources/` is available to all existing signed-in account and company members, including read-only users. It offers separate Sign in and Register links for DAT One, Truckstop, 123Loadboard, Direct Freight, C.H. Robinson/Navisphere Carrier, Uber Freight, RXO Connect, and TQL Carrier Dashboard. Links were checked against official provider pages on November 10, 2026. They open externally with noopener/noreferrer and do not send customer data or store credentials. Registration buttons open the provider signup, plan selection, or carrier onboarding entry point. Customers complete approval and subscriptions directly with the provider; the directory does not imply an API connection, automatic login, or coverage of all freight sources.

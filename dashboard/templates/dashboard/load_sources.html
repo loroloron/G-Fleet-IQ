@@ -1,0 +1,18 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+<div class="mb-4"><h1>Load Sources</h1><p class="lead mb-2">Open a load board or broker portal to find freight.</p><p class="text-muted">Already have an account? Tap Sign in. New to a provider? Tap Register to review their plans or start carrier setup.</p></div>
+<div class="alert alert-info">Each button opens the provider’s website in a new tab. Use your own company’s account. Providers manage their own subscriptions, registration and approval requirements.</div>
+<div class="row g-3">
+{% for source in load_sources %}
+<div class="col-md-6 col-xl-4"><article class="card h-100 shadow-sm"><div class="card-body d-flex flex-column">
+<span class="text-muted small mb-2">{{ source.kind }}</span>
+<h2 class="h5">{{ source.name }}</h2><p class="text-muted small text-break">{{ source.domain }}</p>
+<div class="d-flex flex-wrap gap-2 mt-auto">
+<a href="{{ source.login_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" aria-label="Sign in to {{ source.name }} (opens in a new tab)">Sign in ↗</a>
+<a href="{{ source.register_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary" aria-label="Register with {{ source.name }} (opens in a new tab)">Register ↗</a>
+</div></div></article></div>
+{% endfor %}
+</div>
+<div class="card card-body mt-4"><h2 class="h5">Freight posted on G Fleet IQ</h2><p>Browse direct postings from brokers and shippers, or publish a load for customers to find.</p><a class="align-self-start btn btn-outline-dark" href="{% url 'marketplace' %}">Open Freight Marketplace</a></div>
+<p class="small text-muted mt-4">These are external shortcuts, not connected accounts. G Fleet IQ does not collect provider passwords or import listings through these links. This directory starts with eight providers and does not cover every freight source.</p>
+{% endblock %}

@@ -2,9 +2,11 @@ from django.urls import path
 from . import views, payment_views
 from .analytics import owner_analytics
 from .load_search import find_loads
+from .load_sources import load_sources
 from . import marketplace
 
 urlpatterns = [
+    path("load-sources/", load_sources, name="load_sources"),
     path("marketplace/", marketplace.marketplace, name="marketplace"),
     path("marketplace/post/", marketplace.post_freight, name="post_freight"),
     path("marketplace/<int:posting_id>/", marketplace.freight_detail, name="freight_detail"),

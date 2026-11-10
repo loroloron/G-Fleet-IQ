@@ -110,3 +110,15 @@ class MarketplaceTests(TestCase):
         csrf_client = Client(enforce_csrf_checks=True)
         csrf_client.force_login(self.owner)
         self.assertEqual(csrf_client.post("/marketplace/post/", self.data).status_code, 403)
+
+    def test_load_sources_access_for_customer_and_read_only_member(self):
+        response = self.client.get("/load-sources/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Sign in")
+        self.assertContains(response, "Register")
+        viewer = get_user_model().objects.create_user("sources-viewer")
+        CompanyMembership.objects.create(user=viewer, company=self.company, role="viewer")
+        self.client.force_login(viewer)
+        self.assertEqual(self.client.get("/load-sources/").status_code, 200)
+        self.client.logout()
+        self.assertEqual(self.client.get("/load-sources/").status_code, 302)
