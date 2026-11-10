@@ -2,6 +2,15 @@
 {% block content %}
 <div class="mb-4"><h1>Load Sources</h1><p class="lead mb-2">Open a load board or broker portal to find freight.</p><p class="text-muted">Already have an account? Tap Sign in. New to a provider? Tap Register to review their plans or start carrier setup.</p></div>
 <div class="alert alert-info">Each button opens the provider’s website in a new tab. Use your own company’s account. Providers manage their own subscriptions, registration and approval requirements.</div>
+<section class="mb-4" aria-labelledby="public-load-search">
+<h2 class="h4" id="public-load-search">Search loads — no extra registration</h2>
+<p>Use these public searches without creating a provider account. Results open on the provider’s website; contact the broker or shipper to confirm availability and booking requirements.</p>
+<div class="row g-3">
+<div class="col-md-6"><article class="card card-body h-100 border-success"><span class="badge text-bg-success align-self-start mb-2">No provider account needed to search</span><h3 class="h5">FreightFinder</h3><p>Search freight by origin, destination and equipment.</p><a class="btn btn-success align-self-start mt-auto" href="https://www.freightfinder.com/database/search/state-to-state" target="_blank" rel="noopener noreferrer" aria-label="Search free loads on FreightFinder (opens in a new tab)">Search free loads ↗</a></article></div>
+<div class="col-md-6"><article class="card card-body h-100 border-success"><span class="badge text-bg-success align-self-start mb-2">No provider account needed to search</span><h3 class="h5">Trulos</h3><p>Browse the public load board by state and equipment.</p><a class="btn btn-success align-self-start mt-auto" href="https://trulos.net/load-board/" target="_blank" rel="noopener noreferrer" aria-label="Search free loads on Trulos (opens in a new tab)">Search free loads ↗</a></article></div>
+</div>
+</section>
+<h2 class="h4">Load boards and broker accounts</h2>
 <div class="row g-3">
 {% for source in load_sources %}
 <div class="col-md-6 col-xl-4"><article class="card h-100 shadow-sm"><div class="card-body d-flex flex-column">
@@ -14,5 +23,5 @@
 {% endfor %}
 </div>
 <div class="card card-body mt-4"><h2 class="h5">Freight posted on G Fleet IQ</h2><p>Browse direct postings from brokers and shippers, or publish a load for customers to find.</p><a class="align-self-start btn btn-outline-dark" href="{% url 'marketplace' %}">Open Freight Marketplace</a></div>
-<p class="small text-muted mt-4">These are external shortcuts, not connected accounts. G Fleet IQ does not collect provider passwords or import listings through these links. This directory starts with eight providers and does not cover every freight source.</p>
+<p class="small text-muted mt-4">These are external shortcuts, not connected accounts. G Fleet IQ does not collect provider passwords or import listings through these links. The directory includes public searches and account-based providers; it does not cover every freight source.</p>
 {% endblock %}
