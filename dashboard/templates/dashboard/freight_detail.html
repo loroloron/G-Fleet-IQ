@@ -1,0 +1,16 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+<a href="{% url 'marketplace' %}">← Freight Marketplace</a>
+<h1 class="mt-3">{{ posting.pickup }} → {{ posting.delivery }}</h1>
+{% if not is_live %}<div class="alert alert-warning">This posting is closed, expired, or past its pickup date. It is no longer available in marketplace search.</div>{% endif %}
+<div class="row g-4"><div class="col-md-7"><div class="card card-body">
+<h2 class="h5">Freight details</h2>
+<dl class="row mb-0"><dt class="col-sm-5">Pickup date</dt><dd class="col-sm-7">{{ posting.pickup_date|date:"M j, Y" }}</dd><dt class="col-sm-5">Equipment</dt><dd class="col-sm-7">{{ posting.equipment_type }}</dd><dt class="col-sm-5">Weight</dt><dd class="col-sm-7">{{ posting.weight }} lb</dd><dt class="col-sm-5">Total offered rate</dt><dd class="col-sm-7">{% if posting.rate != None %}${{ posting.rate|floatformat:2 }}{% else %}Contact for rate{% endif %}</dd><dt class="col-sm-5">Expires</dt><dd class="col-sm-7">{{ posting.expires_on|date:"M j, Y" }}</dd></dl>
+{% if posting.notes %}<h3 class="h6 mt-3">Notes</h3><div>{{ posting.notes|linebreaksbr }}</div>{% endif %}
+</div></div><div class="col-md-5"><div class="card card-body">
+<h2 class="h5">Contact the {{ posting.get_business_type_display|lower }}</h2>
+<p><strong>{{ posting.business_name }}</strong><br>{{ posting.contact_name }}<br><a href="mailto:{{ posting.contact_email }}">{{ posting.contact_email }}</a>{% if posting.contact_phone %}<br>{{ posting.contact_phone }}{% endif %}</p>
+<p class="small text-muted mb-0">Contact details and freight are supplied by the poster and have not been independently verified. Confirm availability and terms directly. Viewing a posting does not book the load.</p>
+</div></div></div>
+{% if can_close and posting.status == 'open' %}<form action="{% url 'close_freight' posting.pk %}" method="post" class="mt-4">{% csrf_token %}<button class="btn btn-outline-danger" type="submit">Close posting</button><p class="small text-muted mt-2">Remove this load from marketplace search when it is covered or cancelled.</p></form>{% endif %}
+{% endblock %}

@@ -2,8 +2,13 @@ from django.urls import path
 from . import views, payment_views
 from .analytics import owner_analytics
 from .load_search import find_loads
+from . import marketplace
 
 urlpatterns = [
+    path("marketplace/", marketplace.marketplace, name="marketplace"),
+    path("marketplace/post/", marketplace.post_freight, name="post_freight"),
+    path("marketplace/<int:posting_id>/", marketplace.freight_detail, name="freight_detail"),
+    path("marketplace/<int:posting_id>/close/", marketplace.close_freight, name="close_freight"),
     path("find-loads/", find_loads, name="find_loads"),
     path("owner/analytics/", owner_analytics, name="owner_analytics"),
     path("billing/<int:invoice_id>/pay/<str:provider>/", payment_views.payment_start, name="payment_start"),
