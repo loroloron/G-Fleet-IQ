@@ -1,8 +1,10 @@
 from django.urls import path
 from . import views, payment_views
 from .analytics import owner_analytics
+from .load_search import find_loads
 
 urlpatterns = [
+    path("find-loads/", find_loads, name="find_loads"),
     path("owner/analytics/", owner_analytics, name="owner_analytics"),
     path("billing/<int:invoice_id>/pay/<str:provider>/", payment_views.payment_start, name="payment_start"),
     path("billing/payments/<uuid:payment_id>/return/", payment_views.payment_return, name="payment_return"),
