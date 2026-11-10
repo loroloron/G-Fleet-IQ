@@ -372,3 +372,35 @@ class DriverDutyLog(models.Model):
 
     def __str__(self):
         return f"{self.driver.name} — {self.get_status_display()} — {self.started_at}"
+
+
+class FreightPosting(models.Model):
+    """Freight explicitly published to all signed-in marketplace members.
+
+    Separate from private dispatch loads; publishing never exposes Load records.
+    """
+
+    id = models.BigAutoField(primary_key=True)
+    account = models.ForeignKey(FleetAccount, on_delete=models.CASCADE, related_name="freight_postings")
+    company = models.ForeignKey(Company, null=True, blank=True, on_delete=models.CASCADE, related_name="freight_postings")
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
+    business_name = models.CharField(max_length=200)
+    business_type = models.CharField(max_length=10, choices=[("broker", "Broker"), ("shipper", "Shipper")])
+    contact_name = models.CharField(max_length=100)
+    contact_email = models.EmailField()
+    contact_phone = models.CharField(max_length=30, blank=True)
+    pickup = models.CharField(max_length=200)
+    delivery = models.CharField(max_length=200)
+    pickup_date = models.DateField()
+    equipment_type = models.CharField(max_length=50)
+    weight = models.PositiveIntegerField()
+    rate = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    notes = models.TextField(max_length=3000, blank=True)
+    expires_on = models.DateField()
+    status = models.CharField(max_length=10, choices=[("open", "Open"), ("closed", "Closed")], default="open")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at", "-pk"]
+        indexes = [models.Index(fields=["status", "expires_on"], name="freight_status_expiry")]

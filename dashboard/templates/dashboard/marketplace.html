@@ -1,0 +1,30 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+<div class="d-flex flex-wrap gap-3 justify-content-between align-items-center mb-3">
+<div><h1>Freight Marketplace</h1><p class="text-muted mb-0">Find freight posted directly by brokers and shippers on G Fleet IQ.</p></div>
+{% if can_post %}<a class="btn btn-primary" href="{% url 'post_freight' %}">Post a Load</a>{% endif %}
+</div>
+<div class="alert alert-info">Looking for DAT, Truckstop or broker portals? <a href="{% url 'load_sources' %}" class="alert-link">Open Load Sources to sign in or register</a>. The listings below are direct G Fleet IQ postings.</div>
+<div class="d-flex flex-wrap gap-2 mb-3">
+<a class="btn {% if not mine %}btn-dark{% else %}btn-outline-dark{% endif %}" href="{% url 'marketplace' %}">Available freight</a>
+{% if can_post %}<a class="btn {% if mine %}btn-dark{% else %}btn-outline-dark{% endif %}" href="{% url 'marketplace' %}?mine=1">Manage my postings</a>{% endif %}
+<a class="btn btn-outline-secondary" href="{% url 'find_loads' %}">Search private account loads</a>
+</div>
+<form method="get" class="card card-body mb-4">
+{% if mine %}<input type="hidden" name="mine" value="1">{% endif %}
+<div class="row g-3">{% for field in form %}<div class="col-md-4"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}</div>{% endfor %}</div>
+<div class="mt-3"><button class="btn btn-primary" type="submit">Search freight</button> <a class="btn btn-outline-secondary" href="{% url 'marketplace' %}{% if mine %}?mine=1{% endif %}">Clear</a></div>
+</form>
+<p>{{ page.paginator.count }} posting{{ page.paginator.count|pluralize }} found.{% if mine %} Includes closed and expired postings you can manage.{% endif %}</p>
+<div class="row g-3">
+{% for posting in page %}<div class="col-lg-6"><article class="card h-100"><div class="card-body">
+<div class="d-flex justify-content-between gap-2"><span class="badge text-bg-secondary">{{ posting.get_business_type_display }}</span><span>{% if posting.rate != None %}${{ posting.rate|floatformat:2 }}{% else %}Contact for rate{% endif %}</span></div>
+<h2 class="h5 mt-3">{{ posting.pickup }} → {{ posting.delivery }}</h2>
+<p>{{ posting.business_name }}<br>Pickup {{ posting.pickup_date|date:"M j, Y" }} · {{ posting.equipment_type }} · {{ posting.weight }} lb</p>
+<p class="small text-muted">Direct posting · Expires {{ posting.expires_on|date:"M j, Y" }}{% if mine %} · {{ posting.get_status_display }}{% endif %}</p>
+<a href="{% url 'freight_detail' posting.pk %}" class="btn btn-outline-primary">View freight &amp; contact</a>
+</div></article></div>
+{% empty %}<div class="col-12"><div class="card card-body"><h2 class="h5">No matching freight yet</h2><p class="mb-0">Try broader filters.{% if can_post %} Brokers and shippers can use Post a Load to publish freight here.{% endif %}</p></div></div>{% endfor %}
+</div>
+<nav class="mt-4" aria-label="Marketplace pages">{% if page.has_previous %}<a class="btn btn-outline-primary" href="?{{ query }}&amp;page={{ page.previous_page_number }}">Previous</a>{% endif %} <span>Page {{ page.number }} of {{ page.paginator.num_pages }}</span> {% if page.has_next %}<a class="btn btn-outline-primary" href="?{{ query }}&amp;page={{ page.next_page_number }}">Next</a>{% endif %}</nav>
+{% endblock %}

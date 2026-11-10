@@ -1,0 +1,16 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3"><h1>Find Loads</h1><a href="{% url 'loads' %}" class="btn btn-outline-primary">Manage loads</a></div>
+<div class="alert alert-info"><strong>External load boards are not connected.</strong> <a href="{% url 'load_sources' %}">Open load boards and broker portals to sign in or register</a>. These results are available loads already entered in your account. Live broker listings require an authorized load-board connection.</div>
+<form method="get" class="card card-body mb-4">
+<div class="row g-3">{% for field in form %}<div class="col-md-4"><label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}</div>{% endfor %}</div>
+<div class="mt-3"><button class="btn btn-primary" type="submit">Search available loads</button> <a href="{% url 'find_loads' %}" class="btn btn-outline-secondary">Clear</a></div>
+</form>
+<p>{{ page.paginator.count }} available load{{ page.paginator.count|pluralize }} found.</p>
+<p class="text-muted small">Profit estimates use the existing Profit Engine: $3.75/gallon, driver MPG (7 MPG default), driver pay and recorded expenses. Deadhead miles are excluded. Check all costs before booking.</p>
+<div class="table-responsive"><table class="table table-striped"><thead><tr><th>Route</th><th>Pickup</th><th>Equipment / weight</th><th>Loaded miles</th><th>Rate</th><th>Estimated profit</th><th></th></tr></thead><tbody>
+{% for row in rows %}<tr><td>{{ row.load.pickup }} → {{ row.load.delivery }}</td><td>{{ row.load.pickup_datetime|date:"M j, Y g:i A"|default:"Not set" }}</td><td>{{ row.load.equipment_type }} / {{ row.load.weight }} lb</td><td>{{ row.estimate.miles }}</td><td>${{ row.load.rate|floatformat:2 }}</td><td>{% if row.estimate.miles > 0 %}${{ row.estimate.profit|floatformat:2 }}{% else %}Mileage needed{% endif %}</td><td><a href="{% url 'load_detail' row.load.pk %}">View load</a></td></tr>
+{% empty %}<tr><td colspan="7">No matching loads in your account. Try broader filters or add a load under Manage loads.</td></tr>{% endfor %}
+</tbody></table></div>
+<nav aria-label="Load search pages">{% if page.has_previous %}<a class="btn btn-outline-primary" href="?{{ query }}&amp;page={{ page.previous_page_number }}">Previous</a>{% endif %} <span>Page {{ page.number }} of {{ page.paginator.num_pages }}</span> {% if page.has_next %}<a class="btn btn-outline-primary" href="?{{ query }}&amp;page={{ page.next_page_number }}">Next</a>{% endif %}</nav>
+{% endblock %}

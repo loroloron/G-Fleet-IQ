@@ -1,0 +1,13 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+<h1>Post a Load</h1>
+<p>Publish freight for other G Fleet IQ customers to find and contact you about.</p>
+<div class="alert alert-info">This creates a marketplace posting. Your private dispatch loads and customer records are not published.</div>
+<form method="post" class="card card-body">{% csrf_token %}
+{{ form.non_field_errors }}
+<div class="row g-3">{% for field in form %}<div class="{% if field.name == 'notes' or field.name == 'share_confirmation' %}col-12{% else %}col-md-6{% endif %}">
+{% if field.name == 'share_confirmation' %}<div class="form-check">{{ field }}<label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label></div>{% else %}<label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}{% if field.field.required %} *{% endif %}</label>{{ field }}{% endif %}
+{% for error in field.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}</div>{% endfor %}</div>
+<div class="mt-4"><button class="btn btn-primary" type="submit">Publish to marketplace</button> <a class="btn btn-outline-secondary" href="{% url 'marketplace' %}">Cancel</a></div>
+</form>
+{% endblock %}
